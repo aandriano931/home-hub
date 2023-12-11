@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Filament\Resources\BankParentCategoryResource\Pages;
+namespace App\Filament\Admin\Resources\BankParentCategoryResource\Pages;
 
-use App\Filament\Resources\BankParentCategoryResource;
+use App\Filament\Admin\Resources\BankParentCategoryResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 

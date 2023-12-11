@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Admin\Resources;
 
-use App\Filament\Resources\BankTransactionResource\Pages;
-use App\Filament\Resources\BankTransactionResource\RelationManagers;
-use App\Models\Transaction;
+use App\Filament\Admin\Resources\BankTransactionResource\Pages;
+use App\Filament\Admin\Resources\BankTransactionResource\RelationManagers;
+use App\Models\Bank\Transaction;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -38,12 +38,12 @@ class BankTransactionResource extends Resource
                 Forms\Components\TextInput::make('credit')
                     ->label('Crédit')
                     ->numeric()
-                    ->prefix('€')
+                    ->suffix('€')
                     ->default(0),
                 Forms\Components\TextInput::make('debit')
                     ->label('Débit')
                     ->numeric()
-                    ->prefix('€')
+                    ->suffix('€')
                     ->default(0),
                 Forms\Components\Select::make('bank_account_id')
                     ->relationship('account', 'label')
@@ -63,8 +63,34 @@ class BankTransactionResource extends Resource
     {
         return $table
             ->columns([
-                //
-            ])
+                Tables\Columns\TextColumn::make('label')
+                    ->label('Libellé')
+                    ->searchable(true)
+                    ->sortable()
+                    ->limit(50),
+                Tables\Columns\TextColumn::make('category.name')
+                    ->label('Catégorie'),
+                Tables\Columns\TextColumn::make('operation_date')
+                    ->label('Date d\'opération')
+                    ->dateTime('d/m/Y')
+                    ->searchable(true)
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('value_date')
+                    ->label('Date de valeur')
+                    ->dateTime('d/m/Y')
+                    ->searchable(true)
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('credit')
+                    ->label('Crédit')
+                    ->color('success')
+                    ->money('eur'),
+                Tables\Columns\TextColumn::make('debit')
+                    ->label('Débit')
+                    ->color('danger')
+                    ->money('eur'),
+                Tables\Columns\TextColumn::make('account.label')
+                    ->label('Compte bancaire'),
+            ])->defaultSort('operation_date', 'desc')
             ->filters([
                 //
             ])

@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Admin\Resources;
 
-use App\Filament\Resources\BankAccountResource\Pages;
-use App\Filament\Resources\BankAccountResource\RelationManagers;
+use App\Filament\Admin\Resources\BankAccountResource\Pages;
+use App\Filament\Admin\Resources\BankAccountResource\RelationManagers;
 use App\Models\Bank\Account;
 use Filament\Forms;
 use Filament\Forms\Form;

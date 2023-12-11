@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Filament\Resources\BankAccountResource\Pages;
+namespace App\Filament\Admin\Resources\BankAccountResource\Pages;
 
-use App\Filament\Resources\BankAccountResource;
+use App\Filament\Admin\Resources\BankAccountResource;
 use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 

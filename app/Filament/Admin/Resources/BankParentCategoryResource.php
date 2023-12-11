@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Admin\Resources;
 
-use App\Filament\Resources\BankParentCategoryResource\Pages;
-use App\Filament\Resources\BankParentCategoryResource\RelationManagers;
+use App\Filament\Admin\Resources\BankParentCategoryResource\Pages;
+use App\Filament\Admin\Resources\BankParentCategoryResource\RelationManagers;
 use App\Models\ParentCategory;
 use Filament\Forms;
 use Filament\Forms\Form;

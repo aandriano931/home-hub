@@ -21,7 +21,7 @@ services:
       - ./:/var/www
       - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
     networks:
-      - app-network
+      - net
 
   #Nginx
   nginx:
@@ -36,7 +36,7 @@ services:
       - ./:/var/www
       - ./docker/nginx/:/etc/nginx/conf.d/
     networks:
-      - app-network
+      - net
 
   #MySQL
   mysql:
@@ -58,7 +58,7 @@ services:
       - dbdata:/var/lib/mysql/
       - ./docker/mysql/my.cnf:/etc/mysql/my.cnf
     networks:
-      - app-network
+      - net
 
   # phpmyadmin GUI for mysql     
   phpmyadmin:
@@ -73,12 +73,13 @@ services:
     depends_on:
       - mysql
     networks:
-      - app-network
+      - net
 
 #Networks
 networks:
-  app-network:
+  net:
     driver: bridge
+
 #Volumes
 volumes:
   dbdata:

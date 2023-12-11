@@ -29,7 +29,7 @@ class Transaction extends Model
     /**
      * Get the category that owns the transaction.
      */
-    public function bankTransactionCategory(): BelongsTo
+    public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class, 'bank_category_id');
     }
