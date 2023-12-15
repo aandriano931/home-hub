@@ -39,7 +39,7 @@ class RouteServiceProvider extends ServiceProvider
         });
 
         Livewire::setUpdateRoute(function ($handle) {
-            $url =  'app/public/livewire/update';
+            $url =  'admin/livewire/update';
             return Route::post($url, $handle);
         });
     }
