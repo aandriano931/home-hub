@@ -16,8 +16,8 @@ return new class extends Migration
             $table->string('name', 255);
             $table->string('picto', 255)->nullable();
             $table->string('color', 30)->nullable();
-            $table->dateTime('created_at');
-            $table->dateTime('updated_at');
+            $table->dateTime('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
+            $table->dateTime('updated_at')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->enum('type', ['débit','crédit'])->default('débit');
             $table->foreignUuid('bank_parent_category_id')
                 ->nullable()

@@ -4,7 +4,7 @@ namespace App\Filament\Admin\Resources;
 
 use App\Filament\Admin\Resources\BankParentCategoryResource\Pages;
 use App\Filament\Admin\Resources\BankParentCategoryResource\RelationManagers;
-use App\Models\ParentCategory;
+use App\Models\Bank\ParentCategory;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -17,7 +17,7 @@ class BankParentCategoryResource extends Resource
 {
     public const CREDIT_TYPE = 'crédit';
     public const DEBIT_TYPE = 'débit';
-
+    protected static ?string $navigationGroup = 'Budget';
     protected static ?string $model = ParentCategory::class;
     protected static ?string $label = 'Catégorie parent';
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';

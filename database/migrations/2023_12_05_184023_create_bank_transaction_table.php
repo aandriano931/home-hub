@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('bank_transaction', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->dateTime('created_at');
-            $table->dateTime('updated_at');
+            $table->dateTime('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
+            $table->dateTime('updated_at')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->date('operation_date')->nullable(false);
             $table->date('value_date')->nullable(false);
             $table->string('label', 255)->nullable(false);

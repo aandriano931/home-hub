@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('bank_account', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->dateTime('created_at');
-            $table->dateTime('updated_at');
+            $table->dateTime('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
+            $table->dateTime('updated_at')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->string('alias', 100);
             $table->string('holder', 255);
             $table->string('number', 30);
