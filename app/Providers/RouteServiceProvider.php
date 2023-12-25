@@ -37,10 +37,5 @@ class RouteServiceProvider extends ServiceProvider
             Route::middleware('web')
                 ->group(base_path('routes/web.php'));
         });
-
-        Livewire::setUpdateRoute(function ($handle) {
-            $url =  'admin/livewire/update';
-            return Route::post($url, $handle);
-        });
     }
 }
