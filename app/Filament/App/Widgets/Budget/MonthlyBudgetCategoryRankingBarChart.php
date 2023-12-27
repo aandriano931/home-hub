@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\App\Widgets;
+namespace App\Filament\App\Widgets\Budget;
 
 use App\Repository\Bank\TransactionRepository;
 use Filament\Support\RawJs;
@@ -9,9 +9,10 @@ use Flowframe\Trend\Trend;
 use Illuminate\Support\Carbon;
 use App\Services\Bank\TransactionWidgetService;
 
-class MonthlyBudgetParentCategoryPieChart extends ChartWidget
+class MonthlyBudgetCategoryRankingBarChart extends ChartWidget
 {
-    protected static ?string $heading = 'Dépenses mensuelles par catégorie en pourcentage';
+    private const NUMBER_TO_KEEP = 10;
+    protected static ?string $heading = 'Classement mensuel des dépenses par sous-catégorie';
     protected static ?string $pollingInterval = null;
     private array $rawData = [];
     private array $pieLabels = [];
@@ -21,7 +22,7 @@ class MonthlyBudgetParentCategoryPieChart extends ChartWidget
 
     protected function getData(): array
     {
-        $this->getMonthlySpendingsPerParentCategoryAndMonth();
+        $this->getMonthlySubCategoryRanking();
         $this->getPieLabels();
         if ($this->filter === null) {
             $this->filter = end($this->pieLabels);
@@ -32,9 +33,9 @@ class MonthlyBudgetParentCategoryPieChart extends ChartWidget
         return [
             'datasets' => [
                 [
-                    'label' => 'Dépenses mensuelles pour ' . $activeFilter,
                     'data' => $this->monthlyData,
                     'backgroundColor' => $this->monthlyColors,
+                    'borderColor' => $this->yearlyColors,
                 ],
             ],
             'labels' => $this->monthlyLabels,
@@ -43,18 +44,22 @@ class MonthlyBudgetParentCategoryPieChart extends ChartWidget
 
     protected function getType(): string
     {
-        return 'pie';
+        return 'bar';
     }
 
     protected function getOptions(): RawJs
     {
         return RawJs::make(<<<JS
             {
+                indexAxis: 'y',
                 plugins: {
+                    legend: {
+                        display: false,
+                    },
                     tooltip: {
                         callbacks: {
                             label: function(context) {
-                                return context.label + ' ' + context.formattedValue + '%';
+                                return context.formattedValue + '€';
                             }
                         },
                     },
@@ -62,12 +67,19 @@ class MonthlyBudgetParentCategoryPieChart extends ChartWidget
                 scales: {
                     x: {
                         ticks: {
-                            display: false,
+                            callback: function(value, index, values) {
+                                return value + '€';
+                            },
+                            callbacks: {
+                                label: function(context) {
+                                    return context.formattedValue + '€';
+                                }
+                            }
                         },
                     },
                     y: {
                         ticks: {
-                            display: false,
+                            display: true,
                         },
                     },
                 },
@@ -87,11 +99,11 @@ class MonthlyBudgetParentCategoryPieChart extends ChartWidget
         return $filters;
     }
 
-    private function getMonthlySpendingsPerParentCategoryAndMonth(): void
+    private function getMonthlySubCategoryRanking(): void
     {
         $transactionRepository = new TransactionRepository();
         $transactionService = new TransactionWidgetService();
-        $results = $transactionRepository->getMonthlySpendingsPerCategory(new \DateTime('2021-01-01'));
+        $results = $transactionRepository->getMonthlySubCategoryRanking();
         $improvedResults = $transactionService->addPeriodTotalAndPercentage($results);
         array_pop($improvedResults);
         $this->rawData = $improvedResults;
@@ -112,8 +124,12 @@ class MonthlyBudgetParentCategoryPieChart extends ChartWidget
         $monthlyData = $monthlyLabels = [];
         if (!is_null($month)) {
             $monthlyRawData = $this->rawData[$month];
-            foreach ($monthlyRawData['categories'] as $row) {
-                $monthlyData[] = $row['percentage'];
+            usort($monthlyRawData['categories'], function ($a, $b) {
+                return $b['total'] <=> $a['total'];
+            });
+            $topCategories = array_slice($monthlyRawData['categories'], 0, self::NUMBER_TO_KEEP);
+            foreach ($topCategories as $row) {
+                $monthlyData[] = $row['total'];
                 $monthlyLabels[] = $row['label'];
                 $monthlyColors[] = $row['color'];
             }

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\App\Widgets;
+namespace App\Filament\App\Widgets\Budget;
 
 use App\Repository\Bank\TransactionRepository;
 use Filament\Support\RawJs;
@@ -9,35 +9,35 @@ use Flowframe\Trend\Trend;
 use Illuminate\Support\Carbon;
 use App\Services\Bank\TransactionWidgetService;
 
-class YearlyBudgetCategoryPieChart extends ChartWidget
+class MonthlyBudgetParentCategoryPieChart extends ChartWidget
 {
-    protected static ?string $heading = 'Dépenses annuelles par sous-catégorie en pourcentage';
+    protected static ?string $heading = 'Dépenses mensuelles par catégorie';
     protected static ?string $pollingInterval = null;
     private array $rawData = [];
     private array $pieLabels = [];
-    private array $yearlyData = [];
-    private array $yearlyLabels = [];
-    private array $yearlyColors = [];
+    private array $monthlyData = [];
+    private array $monthlyLabels = [];
+    private array $monthlyColors = [];
 
     protected function getData(): array
     {
-        $this->getYearlySpendingsPerSubCategoryAndYear();
+        $this->getMonthlySpendingsPerParentCategoryAndMonth();
         $this->getPieLabels();
         if ($this->filter === null) {
             $this->filter = end($this->pieLabels);
         }
         $activeFilter = $this->filter;
-        $this->getDataForYear($activeFilter);
+        $this->getDataForMonth($activeFilter);
     
         return [
             'datasets' => [
                 [
                     'label' => 'Dépenses mensuelles pour ' . $activeFilter,
-                    'data' => $this->yearlyData,
-                    'backgroundColor' => $this->yearlyColors,
+                    'data' => $this->monthlyData,
+                    'backgroundColor' => $this->monthlyColors,
                 ],
             ],
-            'labels' => $this->yearlyLabels,
+            'labels' => $this->monthlyLabels,
         ];
     }
 
@@ -79,19 +79,19 @@ class YearlyBudgetCategoryPieChart extends ChartWidget
     {
         $filters = [];
         foreach ($this->pieLabels as $label) {
-            $date = Carbon::createFromFormat('Y', $label);
-            $formattedDate = $date->isoFormat('YYYY');
-            $filters[$label] = $formattedDate;
+            $date = Carbon::createFromFormat('Y-m', $label);
+            $formattedDate = $date->isoFormat('MMMM YYYY');
+            $filters[$label] = ucfirst(trans($formattedDate));
         }
 
         return $filters;
     }
 
-    private function getYearlySpendingsPerSubCategoryAndYear(): void
+    private function getMonthlySpendingsPerParentCategoryAndMonth(): void
     {
         $transactionRepository = new TransactionRepository();
         $transactionService = new TransactionWidgetService();
-        $results = $transactionRepository->getYearlySpendingsPerSubCategory(new \DateTime('2021-01-01'));
+        $results = $transactionRepository->getMonthlySpendingsPerCategory();
         $improvedResults = $transactionService->addPeriodTotalAndPercentage($results);
         array_pop($improvedResults);
         $this->rawData = $improvedResults;
@@ -107,20 +107,20 @@ class YearlyBudgetCategoryPieChart extends ChartWidget
         $this->pieLabels = $pieLabels;
     }
 
-    private function getDataForYear(?string $year): void
+    private function getDataForMonth(?string $month): void
     {
-        $yearlyData = $yearlyLabels = [];
-        if (!is_null($year)) {
-            $yearlyRawData = $this->rawData[$year];
-            foreach ($yearlyRawData['categories'] as $row) {
-                $yearlyData[] = $row['percentage'];
-                $yearlyLabels[] = $row['label'];
-                $yearlyColors[] = $row['color'];
+        $monthlyData = $monthlyLabels = [];
+        if (!is_null($month)) {
+            $monthlyRawData = $this->rawData[$month];
+            foreach ($monthlyRawData['categories'] as $row) {
+                $monthlyData[] = $row['percentage'];
+                $monthlyLabels[] = $row['label'];
+                $monthlyColors[] = $row['color'];
             }
         }
-        $this->yearlyData = $yearlyData;
-        $this->yearlyLabels = $yearlyLabels;
-        $this->yearlyColors = $yearlyColors;
+        $this->monthlyData = $monthlyData;
+        $this->monthlyLabels = $monthlyLabels;
+        $this->monthlyColors = $monthlyColors;
     }
 
 }

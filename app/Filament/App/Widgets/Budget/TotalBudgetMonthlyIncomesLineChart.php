@@ -1,27 +1,28 @@
 <?php
 
-namespace App\Filament\App\Widgets;
+namespace App\Filament\App\Widgets\Budget;
 
 use App\Repository\Bank\TransactionRepository;
 use Filament\Support\RawJs;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Carbon;
 
-class TotalBudgetMonthlySpendingsLineChart extends ChartWidget
+class TotalBudgetMonthlyIncomesLineChart extends ChartWidget
 {
-    protected static ?string $heading = 'Dépenses mensuelles (hors voyages) et moyenne glissante sur un an';
+    protected static ?string $heading = 'Apports mensuels et moyenne glissante sur 6 mois';
+    protected int | string | array $columnSpan = 'full';
 
     protected function getData(): array
     {
 
         $transactionRepository = new TransactionRepository();
-        $results = $transactionRepository->getMonthlySpendings(['Voyages'], new \DateTime('2021-01-01'));
+        $results = $transactionRepository->getMonthlyIncomes([]);
 
         // Remove last month
         $results->pop();
 
-        $spendings = $results->map(function ($item) {
-            return $item->total_debit;
+        $incomes = $results->map(function ($item) {
+            return $item->total_credit;
         });
 
         $labels = $results->map(function ($item) {
@@ -31,15 +32,15 @@ class TotalBudgetMonthlySpendingsLineChart extends ChartWidget
         return [
             'datasets' => [
                 [
-                    'label' => 'Total des dépenses mensuelles',
-                    'borderColor' => '#EB4936',
-                    'backgroundColor' => '#EB4936',
-                    'data' => $spendings,
+                    'label' => 'Total des apports mensuels',
+                    'borderColor' => '#18E346',
+                    'backgroundColor' => '#18E346',
+                    'data' => $incomes,
                     'pointRadius' => 0,
                 ],
                 [
                     'label' => 'Moyenne glissante',
-                    'data' => $this->getEvolutiveMonthlyAverage($spendings->all()),
+                    'data' => $this->getEvolutiveMonthlyAverage($incomes->all(), 6),
                     'borderColor' => '#9BD0F5',
                     'backgroundColor' => '#9BD0F5',
                     'pointRadius' => 0,
@@ -77,17 +78,16 @@ class TotalBudgetMonthlySpendingsLineChart extends ChartWidget
     }
 
 
-    private function getEvolutiveMonthlyAverage(array $monthlyValues): array
+    private function getEvolutiveMonthlyAverage(array $monthlyValues, int $window): array
     {
-        $windowSize = 12;
         $sum = 0;
-        for ($i = 0; $i < $windowSize; $i++) {
+        for ($i = 0; $i < $window; $i++) {
             $sum += $monthlyValues[$i];
             $movingMonthlyAverages[] = $sum / ($i + 1);
         }
-        for ($i = $windowSize; $i < count($monthlyValues); $i++) {
-            $sum = $sum - $monthlyValues[$i - $windowSize] + $monthlyValues[$i];
-            $movingMonthlyAverages[] = $sum / $windowSize;
+        for ($i = $window; $i < count($monthlyValues); $i++) {
+            $sum = $sum - $monthlyValues[$i - $window] + $monthlyValues[$i];
+            $movingMonthlyAverages[] = $sum / $window;
         }
 
         return $movingMonthlyAverages;

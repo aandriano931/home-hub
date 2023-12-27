@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\App\Widgets;
+namespace App\Filament\App\Widgets\Budget;
 
 use App\Repository\Bank\TransactionRepository;
 use Filament\Support\RawJs;
@@ -11,7 +11,7 @@ use App\Services\Bank\TransactionWidgetService;
 
 class YearlyBudgetParentCategoryPieChart extends ChartWidget
 {
-    protected static ?string $heading = 'Dépenses annuelles par catégorie en pourcentage';
+    protected static ?string $heading = 'Dépenses annuelles par catégorie';
     protected static ?string $pollingInterval = null;
     private array $rawData = [];
     private array $pieLabels = [];
@@ -91,7 +91,7 @@ class YearlyBudgetParentCategoryPieChart extends ChartWidget
     {
         $transactionRepository = new TransactionRepository();
         $transactionService = new TransactionWidgetService();
-        $results = $transactionRepository->getYearlySpendingsPerCategory(new \DateTime('2021-01-01'));
+        $results = $transactionRepository->getYearlySpendingsPerCategory();
         $improvedResults = $transactionService->addPeriodTotalAndPercentage($results);
         array_pop($improvedResults);
         $this->rawData = $improvedResults;
