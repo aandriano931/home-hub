@@ -91,7 +91,8 @@ class MonthlyBudgetParentCategoryPieChart extends ChartWidget
     {
         $transactionRepository = new TransactionRepository();
         $transactionService = new TransactionWidgetService();
-        $results = $transactionRepository->getMonthlySpendingsPerCategory();
+        $results = $transactionRepository->getMonthlySpendingsPerCategory(['Voyages', 'Virements internes']);
+        // dd($results);
         $improvedResults = $transactionService->addPeriodTotalAndPercentage($results);
         array_pop($improvedResults);
         $this->rawData = $improvedResults;
@@ -112,9 +113,9 @@ class MonthlyBudgetParentCategoryPieChart extends ChartWidget
         $monthlyData = $monthlyLabels = [];
         if (!is_null($month)) {
             $monthlyRawData = $this->rawData[$month];
-            foreach ($monthlyRawData['categories'] as $row) {
+            foreach ($monthlyRawData['parent_categories'] as $label => $row) {
                 $monthlyData[] = $row['percentage'];
-                $monthlyLabels[] = $row['label'];
+                $monthlyLabels[] = $label;
                 $monthlyColors[] = $row['color'];
             }
         }

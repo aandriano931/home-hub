@@ -91,7 +91,7 @@ class YearlyBudgetParentCategoryPieChart extends ChartWidget
     {
         $transactionRepository = new TransactionRepository();
         $transactionService = new TransactionWidgetService();
-        $results = $transactionRepository->getYearlySpendingsPerCategory();
+        $results = $transactionRepository->getYearlySpendingsPerCategory(['Voyages', 'Virements internes']);
         $improvedResults = $transactionService->addPeriodTotalAndPercentage($results);
         array_pop($improvedResults);
         $this->rawData = $improvedResults;

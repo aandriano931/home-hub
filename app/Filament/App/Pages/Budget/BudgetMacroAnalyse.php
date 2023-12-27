@@ -2,10 +2,10 @@
 
 namespace App\Filament\App\Pages\Budget;
 
-use App\Filament\App\Widgets\Budget\TotalBudgetMonthlyCategorySpendingsLineChart;
-use App\Filament\App\Widgets\Budget\TotalBudgetMonthlyParentCategorySpendingsLineChart;
+use App\Filament\App\Widgets\Budget\TotalBudgetCategoryRankingBarChart;
 use App\Filament\App\Widgets\Budget\TotalBudgetMonthlySpendingsLineChart;
 use App\Filament\App\Widgets\Budget\TotalBudgetMonthlyIncomesLineChart;
+use App\Filament\App\Widgets\Budget\TotalBudgetParentCategoryRankingBarChart;
 use Filament\Pages\Page;
 
 class BudgetMacroAnalyse extends Page
@@ -21,9 +21,9 @@ class BudgetMacroAnalyse extends Page
     {
         return [
             TotalBudgetMonthlySpendingsLineChart::class,
+            TotalBudgetParentCategoryRankingBarChart::class,
+            TotalBudgetCategoryRankingBarChart::class,
             TotalBudgetMonthlyIncomesLineChart::class,
-            TotalBudgetMonthlyParentCategorySpendingsLineChart::class,
-            TotalBudgetMonthlyCategorySpendingsLineChart::class,
         ];
     }
 }

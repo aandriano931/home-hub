@@ -23,7 +23,7 @@ class MonthlyBudgetCategoryRankingBarChart extends ChartWidget
     protected function getData(): array
     {
         $this->getMonthlySubCategoryRanking();
-        $this->getPieLabels();
+        $this->getChartLabels();
         if ($this->filter === null) {
             $this->filter = end($this->pieLabels);
         }
@@ -35,7 +35,7 @@ class MonthlyBudgetCategoryRankingBarChart extends ChartWidget
                 [
                     'data' => $this->monthlyData,
                     'backgroundColor' => $this->monthlyColors,
-                    'borderColor' => $this->yearlyColors,
+                    'borderColor' => $this->monthlyColors,
                 ],
             ],
             'labels' => $this->monthlyLabels,
@@ -103,13 +103,13 @@ class MonthlyBudgetCategoryRankingBarChart extends ChartWidget
     {
         $transactionRepository = new TransactionRepository();
         $transactionService = new TransactionWidgetService();
-        $results = $transactionRepository->getMonthlySubCategoryRanking();
+        $results = $transactionRepository->getMonthlySubCategoryRanking(['Voyages', 'Virements internes']);
         $improvedResults = $transactionService->addPeriodTotalAndPercentage($results);
         array_pop($improvedResults);
         $this->rawData = $improvedResults;
     }
 
-    private function getPieLabels(): void
+    private function getChartLabels(): void
     {
         $data = $this->rawData;
         $pieLabels = [];

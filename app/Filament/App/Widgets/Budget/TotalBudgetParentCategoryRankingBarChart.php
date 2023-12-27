@@ -7,35 +7,31 @@ use Filament\Support\RawJs;
 use Filament\Widgets\ChartWidget;
 use App\Services\Bank\TransactionWidgetService;
 
-class YearlyBudgetParentCategoryRankingBarChart extends ChartWidget
+class TotalBudgetParentCategoryRankingBarChart extends ChartWidget
 {
-    protected static ?string $heading = 'Classement annuel des dépenses par catégorie';
+    protected static ?string $heading = 'Classement des dépenses par catégorie (hors voyages)';
     protected static ?string $pollingInterval = null;
     private array $rawData = [];
     private array $pieLabels = [];
-    private array $yearlyData = [];
-    private array $yearlyLabels = [];
-    private array $yearlyColors = [];
+    private array $totalData = [];
+    private array $totalLabels = [];
+    private array $totalColors = [];
 
     protected function getData(): array
     {
-        $this->getYearlyCategoryRanking();
+        $this->getTotalCategoryRanking();
         $this->getPieLabels();
-        if ($this->filter === null) {
-            $this->filter = end($this->pieLabels);
-        }
-        $activeFilter = $this->filter;
-        $this->getDataForYear($activeFilter);
+        $this->getTotalData();
     
         return [
             'datasets' => [
                 [
-                    'data' => $this->yearlyData,
-                    'backgroundColor' => $this->yearlyColors,
-                    'borderColor' => $this->yearlyColors,
+                    'data' => $this->totalData,
+                    'backgroundColor' => $this->totalColors,
+                    'borderColor' => $this->totalColors,
                 ],
             ],
-            'labels' => $this->yearlyLabels,
+            'labels' => $this->totalLabels,
         ];
     }
 
@@ -84,22 +80,12 @@ class YearlyBudgetParentCategoryRankingBarChart extends ChartWidget
         JS);
     }
     
-    protected function getFilters(): ?array
-    {
-        foreach ($this->pieLabels as $label) {
-            $filters[$label] = $label;
-        }
-
-        return $filters;
-    }
-
-    private function getYearlyCategoryRanking(): void
+    private function getTotalCategoryRanking(): void
     {
         $transactionRepository = new TransactionRepository();
         $transactionService = new TransactionWidgetService();
-        $results = $transactionRepository->getYearlyCategoryRanking(['Voyages', 'Virements internes']);
-        $improvedResults = $transactionService->addPeriodTotalAndPercentage($results);
-        array_pop($improvedResults);
+        $results = $transactionRepository->getTotalCategoryRanking(['Voyages', 'Virements internes']);
+        $improvedResults = $transactionService->addTotalAndPercentage($results);
         $this->rawData = $improvedResults;
     }
 
@@ -107,26 +93,24 @@ class YearlyBudgetParentCategoryRankingBarChart extends ChartWidget
     {
         $data = $this->rawData;
         $pieLabels = [];
-        foreach ($data as $key => $row) {
-            $pieLabels[] = $key;
+        foreach ($data['categories'] as $category) {
+            $pieLabels[] = $category['label'];
         }
         $this->pieLabels = $pieLabels;
     }
 
-    private function getDataForYear(?string $year): void
+    private function getTotalData(): void
     {
-        $yearlyData = $yearlyLabels = [];
-        if (!is_null($year)) {
-            $yearlyRawData = $this->rawData[$year];
-            foreach ($yearlyRawData['categories'] as $row) {
-                $yearlyData[] = $row['total'];
-                $yearlyLabels[] = $row['label'];
-                $yearlyColors[] = $row['color'];
-            }
+        $totalData = $totalLabels = [];
+        $totalRawData = $this->rawData;
+        foreach ($totalRawData['categories'] as $row) {
+            $totalData[] = $row['total'];
+            $totalLabels[] = $row['label'];
+            $totalColors[] = $row['color'];
         }
-        $this->yearlyData = $yearlyData;
-        $this->yearlyLabels = $yearlyLabels;
-        $this->yearlyColors = $yearlyColors;
+        $this->totalData = $totalData;
+        $this->totalLabels = $totalLabels;
+        $this->totalColors = $totalColors;
     }
 
 }

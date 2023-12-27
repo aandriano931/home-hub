@@ -22,7 +22,7 @@ class MonthlyBudgetParentCategoryRankingBarChart extends ChartWidget
     protected function getData(): array
     {
         $this->getMonthlyCategoryRanking();
-        $this->getPieLabels();
+        $this->getChartLabels();
         if ($this->filter === null) {
             $this->filter = end($this->pieLabels);
         }
@@ -34,7 +34,7 @@ class MonthlyBudgetParentCategoryRankingBarChart extends ChartWidget
                 [
                     'data' => $this->monthlyData,
                     'backgroundColor' => $this->monthlyColors,
-                    'borderColor' => $this->yearlyColors,
+                    'borderColor' => $this->monthlyColors,
                 ],
             ],
             'labels' => $this->monthlyLabels,
@@ -102,13 +102,13 @@ class MonthlyBudgetParentCategoryRankingBarChart extends ChartWidget
     {
         $transactionRepository = new TransactionRepository();
         $transactionService = new TransactionWidgetService();
-        $results = $transactionRepository->getMonthlyCategoryRanking();
+        $results = $transactionRepository->getMonthlyCategoryRanking(['Voyages', 'Virements internes']);
         $improvedResults = $transactionService->addPeriodTotalAndPercentage($results);
         array_pop($improvedResults);
         $this->rawData = $improvedResults;
     }
 
-    private function getPieLabels(): void
+    private function getChartLabels(): void
     {
         $data = $this->rawData;
         $pieLabels = [];
@@ -123,10 +123,13 @@ class MonthlyBudgetParentCategoryRankingBarChart extends ChartWidget
         $monthlyData = $monthlyLabels = [];
         if (!is_null($month)) {
             $monthlyRawData = $this->rawData[$month];
-            foreach ($monthlyRawData['categories'] as $row) {
-                $monthlyData[] = $row['total'];
-                $monthlyLabels[] = $row['label'];
-                $monthlyColors[] = $row['color'];
+            uasort($monthlyRawData['parent_categories'], function ($a, $b) {
+                return $b['total'] <=> $a['total'];
+            });
+            foreach ($monthlyRawData['parent_categories'] as $label => $data) {
+                $monthlyData[] = $data['total'];
+                $monthlyLabels[] = $label;
+                $monthlyColors[] = $data['color'];
             }
         }
         $this->monthlyData = $monthlyData;

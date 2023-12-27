@@ -21,7 +21,7 @@ class TotalBudgetMonthlyParentCategorySpendingsLineChart extends ChartWidget
     {
         $transactionRepository = new TransactionRepository();
         $transactionService = new TransactionWidgetService();
-        $results = $transactionRepository->getSpecificMonthlySpendingsPerCategory(['Voyages']);
+        $results = $transactionRepository->getMonthlySpendingsPerCategory(['Voyages', 'Virements internes']);
         $sortedResults = $transactionService->sortPerMonthAndCategory($results);
         $categories = $this->extractCategoriesAndColors($sortedResults);
         $data = $this->initializeDataWithCategories($categories);

@@ -16,7 +16,7 @@ class TotalBudgetMonthlySpendingsLineChart extends ChartWidget
     {
 
         $transactionRepository = new TransactionRepository();
-        $results = $transactionRepository->getMonthlySpendings(['Voyages']);
+        $results = $transactionRepository->getMonthlySpendings(['Voyages', 'Virements internes']);
 
         // Remove last month
         $results->pop();

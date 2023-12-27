@@ -9,97 +9,42 @@ use Illuminate\Support\Facades\DB;
 class TransactionRepository
 {
     private const START_DATE = '2020-01-01';
+    private const YEAR_MONTH_SELECT = "CONCAT(YEAR(operation_date), '-', LPAD(MONTH(operation_date), 2, '0')) AS period";
+
     private string $table = "bank_transaction";
 
     /**
      * getMonthlySpendingsPerCategory
      *
-     * @param  DateTime $startDate
-     * @return Collection
-     */
-    public function getMonthlySpendingsPerCategory(DateTime $startDate = new DateTime(self::START_DATE)): Collection {
-        return DB::table($this->table)
-            ->join('bank_category', 'bank_category.id', '=', 'bank_transaction.bank_category_id')
-            ->join('bank_parent_category', 'bank_parent_category.id', '=', 'bank_category.bank_parent_category_id')
-            ->select(
-                DB::raw("CONCAT(YEAR(operation_date), '-', LPAD(MONTH(operation_date), 2, '0')) AS period"),
-                DB::raw("SUM(debit) AS total_debit"),
-                'bank_parent_category.name AS category',
-                'bank_parent_category.color AS color',
-            )
-            ->where('operation_date', '>=', $startDate->format('Y-m-d'))
-            ->where('bank_category.name', '!=', 'Voyages')
-            ->groupBy('period', 'category', 'color')
-            ->orderBy('period')
-            ->orderBy('category')
-            ->get();
-    }
-
-    /**
-     * getSpecificMonthlySpendingsPerCategory
-     *
      * @param  array $excludedCategories
      * @param  DateTime $startDate
-     * @param  int $threshold
      * @return Collection
      */
-    public function getSpecificMonthlySpendingsPerCategory(
-        array $excludedCategories,
-         DateTime $startDate = new DateTime(self::START_DATE)
-         ): Collection {
+    public function getMonthlySpendingsPerCategory(array $excludedCategories, DateTime $startDate = null): Collection {
         $query = DB::table($this->table)
             ->join('bank_category', 'bank_category.id', '=', 'bank_transaction.bank_category_id')
             ->join('bank_parent_category', 'bank_parent_category.id', '=', 'bank_category.bank_parent_category_id')
             ->select(
-                DB::raw("CONCAT(YEAR(operation_date), '-', LPAD(MONTH(operation_date), 2, '0')) AS period"),
-                DB::raw("SUM(debit) AS total_debit"),
-                'bank_parent_category.name AS category',
-                'bank_parent_category.color AS color',
-            )
-            ->where('operation_date', '>=', $startDate->format('Y-m-d'));
-            if (!empty($excludedCategories)) {
-                $query->whereNotIn('bank_category.name', $excludedCategories);
-            }
-        $query
-            ->groupBy('period', 'category', 'color')
-            ->orderBy('period')
-            ->orderBy('category');
-
-        return $query->get();
-    }
-
-    /**
-     * getSpecificMonthlySpendingsPerSubCategory
-     *
-     * @param  array $excludedCategories
-     * @param  DateTime $startDate
-     * @param  int $threshold
-     * @return Collection
-     */
-    public function getSpecificMonthlySpendingsPerSubCategory(
-        array $excludedCategories,
-         DateTime $startDate = new DateTime(self::START_DATE)
-         ): Collection {
-        $query = DB::table($this->table)
-            ->join('bank_category', 'bank_category.id', '=', 'bank_transaction.bank_category_id')
-            ->join('bank_parent_category', 'bank_parent_category.id', '=', 'bank_category.bank_parent_category_id')
-            ->select(
-                DB::raw("CONCAT(YEAR(operation_date), '-', LPAD(MONTH(operation_date), 2, '0')) AS period"),
+                DB::raw(self::YEAR_MONTH_SELECT),
                 DB::raw("SUM(debit) AS total_debit"),
                 'bank_category.name AS category',
                 'bank_category.color AS color',
+                'bank_parent_category.name AS parent_category',
+                'bank_parent_category.color AS parent_color',
             )
-            ->where('operation_date', '>=', $startDate->format('Y-m-d'));
-            if (!empty($excludedCategories)) {
-                $query->whereNotIn('bank_category.name', $excludedCategories);
-            }
-        $query
-            ->groupBy('period', 'category', 'color')
-            ->orderBy('period')
-            ->orderBy('category');
+            ->where('operation_date', '>=', $this->getStartDateString($startDate));
 
-        return $query->get();
+        if (!empty($excludedCategories)) {
+            $query->whereNotIn('bank_category.name', $excludedCategories);
+        }
+
+        return $query
+            ->groupBy('period', 'category', 'color', 'parent_category', 'parent_color')
+            ->orderBy('period')
+            ->orderBy('parent_category')
+            ->get();
     }
+
 
     /**
      * getMonthlySpendingsPerSubCategory
@@ -108,21 +53,28 @@ class TransactionRepository
      * @param  DateTime $startDate
      * @return Collection
      */
-    public function getMonthlySpendingsPerSubCategory(DateTime $startDate = new DateTime(self::START_DATE)): Collection {
-        return DB::table($this->table)
+    public function getMonthlySpendingsPerSubCategory(array $excludedCategories, DateTime $startDate = null): Collection {
+        $query = DB::table($this->table)
             ->join('bank_category', 'bank_category.id', '=', 'bank_transaction.bank_category_id')
             ->join('bank_parent_category', 'bank_parent_category.id', '=', 'bank_category.bank_parent_category_id')
             ->select(
-                DB::raw("CONCAT(YEAR(operation_date), '-', LPAD(MONTH(operation_date), 2, '0')) AS period"),
+                DB::raw(self::YEAR_MONTH_SELECT),
                 DB::raw("SUM(debit) AS total_debit"),
                 'bank_category.name AS category',
                 'bank_category.color AS color',
-                'bank_parent_category.name',
+                'bank_parent_category.color AS parent_color',
+                'bank_parent_category.name AS parent_category',
             )
-            ->where('operation_date', '>=', $startDate->format('Y-m-d'))
-            ->groupBy('period', 'category', 'color', 'bank_parent_category.name')
+            ->where('operation_date', '>=', $this->getStartDateString($startDate));
+
+        if (!empty($excludedCategories)) {
+            $query->whereNotIn('bank_category.name', $excludedCategories);
+        }
+
+        return $query
+            ->groupBy('period', 'category', 'color', 'parent_category', 'parent_color')
             ->orderBy('period')
-            ->orderBy('bank_parent_category.name')
+            ->orderBy('parent_category')
             ->get();
     }
 
@@ -133,8 +85,8 @@ class TransactionRepository
      * @param  DateTime $startDate
      * @return Collection
      */
-    public function getYearlySpendingsPerSubCategory(DateTime $startDate = new DateTime(self::START_DATE)): Collection {
-        return DB::table($this->table)
+    public function getYearlySpendingsPerSubCategory(array $excludedCategories, DateTime $startDate = null): Collection {
+        $query = DB::table($this->table)
             ->join('bank_category', 'bank_category.id', '=', 'bank_transaction.bank_category_id')
             ->join('bank_parent_category', 'bank_parent_category.id', '=', 'bank_category.bank_parent_category_id')
             ->select(
@@ -142,11 +94,17 @@ class TransactionRepository
                 DB::raw("SUM(debit) AS total_debit"),
                 'bank_category.name AS category',
                 'bank_category.color AS color',
-                'bank_parent_category.name',
+                'bank_parent_category.color AS parent_color',
+                'bank_parent_category.name AS parent_category',
             )
-            ->where('operation_date', '>=', $startDate->format('Y-m-d'))
-            ->where('bank_category.name', '!=', 'Voyages')
-            ->groupBy('period', 'category', 'color', 'bank_parent_category.name')
+            ->where('operation_date', '>=', $this->getStartDateString($startDate));
+        
+        if (!empty($excludedCategories)) {
+            $query->whereNotIn('bank_category.name', $excludedCategories);
+        }
+        
+        return $query
+            ->groupBy('period', 'category', 'color', 'parent_category', 'parent_color')
             ->orderBy('period')
             ->orderBy('bank_parent_category.name')
             ->get();
@@ -159,8 +117,8 @@ class TransactionRepository
      * @param  DateTime $startDate
      * @return Collection
      */
-    public function getYearlySpendingsPerCategory(DateTime $startDate = new DateTime(self::START_DATE)): Collection {
-        return DB::table($this->table)
+    public function getYearlySpendingsPerCategory(array $excludedCategories, DateTime $startDate = null): Collection {
+        $query = DB::table($this->table)
             ->join('bank_category', 'bank_category.id', '=', 'bank_transaction.bank_category_id')
             ->join('bank_parent_category', 'bank_parent_category.id', '=', 'bank_category.bank_parent_category_id')
             ->select(
@@ -168,10 +126,17 @@ class TransactionRepository
                 DB::raw("SUM(debit) AS total_debit"),
                 'bank_parent_category.name AS category',
                 'bank_parent_category.color AS color',
+                'bank_parent_category.color AS parent_color',
+                'bank_parent_category.name AS parent_category',
             )
-            ->where('operation_date', '>=', $startDate->format('Y-m-d'))
-            ->where('bank_category.name', '!=', 'Voyages')
-            ->groupBy('period', 'category', 'color')
+            ->where('operation_date', '>=', $this->getStartDateString($startDate));
+
+        if (!empty($excludedCategories)) {
+            $query->whereNotIn('bank_category.name', $excludedCategories);
+        }
+
+        return $query
+            ->groupBy('period', 'category', 'color', 'parent_category', 'parent_color')
             ->orderBy('period')
             ->orderBy('category')
             ->get();
@@ -184,20 +149,28 @@ class TransactionRepository
      * @param  DateTime $startDate
      * @return Collection
      */
-    public function getMonthlyCategoryRanking(DateTime $startDate = new DateTime(self::START_DATE)): Collection {
-        return DB::table($this->table)
+    public function getMonthlyCategoryRanking(array $excludedCategories, DateTime $startDate = null): Collection {
+        $query = DB::table($this->table)
             ->join('bank_category', 'bank_category.id', '=', 'bank_transaction.bank_category_id')
             ->join('bank_parent_category', 'bank_parent_category.id', '=', 'bank_category.bank_parent_category_id')
             ->select(
-                DB::raw("CONCAT(YEAR(operation_date), '-', LPAD(MONTH(operation_date), 2, '0')) AS period"),
+                DB::raw(self::YEAR_MONTH_SELECT),
                 DB::raw("SUM(debit) AS total_debit"),
-                'bank_parent_category.name AS category',
-                'bank_parent_category.color AS color',
+                'bank_category.name AS category',
+                'bank_category.color AS color',
+                'bank_parent_category.name AS parent_category',
+                'bank_parent_category.color AS parent_color',
             )
-            ->where('operation_date', '>=', $startDate->format('Y-m-d'))
-            ->groupBy('period', 'category', 'color')
+            ->where('operation_date', '>=', $this->getStartDateString($startDate));
+
+        if (!empty($excludedCategories)) {
+            $query->whereNotIn('bank_category.name', $excludedCategories);
+        }
+
+        return $query
+            ->groupBy('period', 'category', 'color', 'parent_category', 'parent_color')
             ->orderBy('period')
-            ->orderBy('total_debit', 'DESC')
+            ->orderBy('category')
             ->get();
     }
 
@@ -208,7 +181,7 @@ class TransactionRepository
      * @param  DateTime $startDate
      * @return Collection
      */
-    public function getYearlyCategoryRanking(array $excludedCategories, DateTime $startDate = new DateTime(self::START_DATE)): Collection {
+    public function getYearlyCategoryRanking(array $excludedCategories, DateTime $startDate = null): Collection {
         $query = DB::table($this->table)
             ->join('bank_category', 'bank_category.id', '=', 'bank_transaction.bank_category_id')
             ->join('bank_parent_category', 'bank_parent_category.id', '=', 'bank_category.bank_parent_category_id')
@@ -217,14 +190,17 @@ class TransactionRepository
                 DB::raw("SUM(debit) AS total_debit"),
                 'bank_parent_category.name AS category',
                 'bank_parent_category.color AS color',
+                'bank_parent_category.color AS parent_color',
+                'bank_parent_category.name AS parent_category',
             )
-            ->where('operation_date', '>=', $startDate->format('Y-m-d'));
+            ->where('operation_date', '>=', $this->getStartDateString($startDate));
 
         if (!empty($excludedCategories)) {
             $query->whereNotIn('bank_category.name', $excludedCategories);
         }
+
         return $query
-            ->groupBy('period', 'category', 'color')
+            ->groupBy('period', 'category', 'color', 'parent_category', 'parent_color')
             ->orderBy('period')
             ->orderBy('total_debit', 'DESC')
             ->get();
@@ -237,7 +213,7 @@ class TransactionRepository
      * @param  DateTime $startDate
      * @return Collection
      */
-    public function getYearlySubCategoryRanking(array $excludedCategories, DateTime $startDate = new DateTime(self::START_DATE)): Collection {
+    public function getYearlySubCategoryRanking(array $excludedCategories, DateTime $startDate = null): Collection {
         $query = DB::table($this->table)
             ->join('bank_category', 'bank_category.id', '=', 'bank_transaction.bank_category_id')
             ->join('bank_parent_category', 'bank_parent_category.id', '=', 'bank_category.bank_parent_category_id')
@@ -246,15 +222,77 @@ class TransactionRepository
                 DB::raw("SUM(debit) AS total_debit"),
                 'bank_category.name AS category',
                 'bank_category.color AS color',
+                'bank_parent_category.color AS parent_color',
+                'bank_parent_category.name AS parent_category',
             )
-            ->where('operation_date', '>=', $startDate->format('Y-m-d'));
+            ->where('operation_date', '>=', $this->getStartDateString($startDate));
+
+        if (!empty($excludedCategories)) {
+            $query->whereNotIn('bank_category.name', $excludedCategories);
+        }
+
+        return $query
+            ->groupBy('period', 'category', 'color', 'parent_category', 'parent_color')
+            ->orderBy('period')
+            ->orderBy('total_debit', 'DESC')
+            ->get();
+    }
+    
+    /**
+     * getTotalCategoryRanking
+     *
+     * @param  array $excludedCategories
+     * @param  DateTime $startDate
+     * @return Collection
+     */
+    public function getTotalCategoryRanking(array $excludedCategories, DateTime $startDate = null): Collection {
+        $query = DB::table($this->table)
+            ->join('bank_category', 'bank_category.id', '=', 'bank_transaction.bank_category_id')
+            ->join('bank_parent_category', 'bank_parent_category.id', '=', 'bank_category.bank_parent_category_id')
+            ->select(
+                DB::raw("SUM(debit) AS total_debit"),
+                'bank_parent_category.name AS category',
+                'bank_parent_category.color AS color',
+                'bank_parent_category.color AS parent_color',
+                'bank_parent_category.name AS parent_category',
+            )
+            ->where('operation_date', '>=', $this->getStartDateString($startDate));
 
         if (!empty($excludedCategories)) {
             $query->whereNotIn('bank_category.name', $excludedCategories);
         }
         return $query
-            ->groupBy('period', 'category', 'color')
-            ->orderBy('period')
+            ->groupBy('category', 'color', 'parent_category', 'parent_color')
+            ->orderBy('total_debit', 'DESC')
+            ->get();
+    }
+
+        /**
+     * getTotalCategoryRanking
+     *
+     * @param  array $excludedCategories
+     * @param  DateTime $startDate
+     * @return Collection
+     */
+    public function getTotalSubCategoryRanking(array $excludedCategories, DateTime $startDate = null): Collection {
+        $query = DB::table($this->table)
+            ->join('bank_category', 'bank_category.id', '=', 'bank_transaction.bank_category_id')
+            ->join('bank_parent_category', 'bank_parent_category.id', '=', 'bank_category.bank_parent_category_id')
+            ->select(
+                DB::raw("SUM(debit) AS total_debit"),
+                'bank_category.name AS category',
+                'bank_category.color AS color',
+                'bank_parent_category.color AS parent_color',
+                'bank_parent_category.name AS parent_category',
+            )
+            ->where('operation_date', '>=', $this->getStartDateString($startDate));
+
+        if (!empty($excludedCategories)) {
+            $query->whereNotIn('bank_category.name', $excludedCategories);
+        }
+        
+        return $query
+            ->groupBy('category', 'color', 'parent_category', 'parent_color')
             ->orderBy('total_debit', 'DESC')
             ->get();
     }
@@ -266,19 +304,26 @@ class TransactionRepository
      * @param  DateTime $startDate
      * @return Collection
      */
-    public function getMonthlySubCategoryRanking(DateTime $startDate = new DateTime(self::START_DATE)): Collection {
-        return DB::table($this->table)
+    public function getMonthlySubCategoryRanking(array $excludedCategories, DateTime $startDate = null): Collection {
+        $query = DB::table($this->table)
             ->join('bank_category', 'bank_category.id', '=', 'bank_transaction.bank_category_id')
             ->join('bank_parent_category', 'bank_parent_category.id', '=', 'bank_category.bank_parent_category_id')
             ->select(
-                DB::raw("CONCAT(YEAR(operation_date), '-', LPAD(MONTH(operation_date), 2, '0')) AS period"),
+                DB::raw(self::YEAR_MONTH_SELECT),
                 DB::raw("SUM(debit) AS total_debit"),
                 'bank_category.name AS category',
                 'bank_category.color AS color',
-                'bank_parent_category.name',
+                'bank_parent_category.name AS parent_category',
+                'bank_parent_category.color AS parent_color',
             )
-            ->where('operation_date', '>=', $startDate->format('Y-m-d'))
-            ->groupBy('period', 'category', 'color', 'bank_parent_category.name')
+            ->where('operation_date', '>=', $this->getStartDateString($startDate));
+
+        if (!empty($excludedCategories)) {
+            $query->whereNotIn('bank_category.name', $excludedCategories);
+        }
+
+        return $query
+            ->groupBy('period', 'category', 'color', 'parent_category', 'parent_color')
             ->orderBy('period')
             ->orderBy('total_debit', 'DESC')
             ->get();
@@ -291,14 +336,14 @@ class TransactionRepository
      * @param  DateTime $startDate
      * @return Collection
      */
-    public function getMonthlySpendings(array $excludedCategories, DateTime $startDate = new DateTime(self::START_DATE)): Collection {
+    public function getMonthlySpendings(array $excludedCategories, DateTime $startDate = null): Collection {
         $query = DB::table($this->table)
             ->join('bank_category', 'bank_category.id', '=', 'bank_transaction.bank_category_id')
             ->select(
-                DB::raw("CONCAT(YEAR(operation_date), '-', LPAD(MONTH(operation_date), 2, '0')) AS period"),
+                DB::raw(self::YEAR_MONTH_SELECT),
                 DB::raw("SUM(debit) AS total_debit"),
             )
-            ->where('operation_date', '>=', $startDate->format('Y-m-d'));
+            ->where('operation_date', '>=', $this->getStartDateString($startDate));
 
         if (!empty($excludedCategories)) {
             $query->whereNotIn('bank_category.name', $excludedCategories);
@@ -317,14 +362,14 @@ class TransactionRepository
      * @param  DateTime $startDate
      * @return Collection
      */
-    public function getMonthlyIncomes(array $excludedCategories, DateTime $startDate = new DateTime(self::START_DATE)): Collection {
+    public function getMonthlyIncomes(array $excludedCategories, ?DateTime $startDate = null): Collection {
         $query = DB::table($this->table)
             ->join('bank_category', 'bank_category.id', '=', 'bank_transaction.bank_category_id')
             ->select(
-                DB::raw("CONCAT(YEAR(operation_date), '-', LPAD(MONTH(operation_date), 2, '0')) AS period"),
+                DB::raw(self::YEAR_MONTH_SELECT),
                 DB::raw("SUM(credit) AS total_credit"),
             )
-            ->where('operation_date', '>=', $startDate->format('Y-m-d'));
+            ->where('operation_date', '>=', $this->getStartDateString($startDate));
 
         if (!empty($excludedCategories)) {
             $query->whereNotIn('bank_category.name', $excludedCategories);
@@ -334,6 +379,15 @@ class TransactionRepository
             ->groupBy('period')
             ->orderBy('period')
             ->get();
+    }
+
+    private function getStartDateString(?DateTime $startDate): string
+    {
+        if (is_null($startDate)) {
+            $startDate = new DateTime(self::START_DATE);
+        }
+
+        return $startDate->format('Y-m-d');
     }
 
 }
