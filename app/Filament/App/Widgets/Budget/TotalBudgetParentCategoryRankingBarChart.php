@@ -20,7 +20,7 @@ class TotalBudgetParentCategoryRankingBarChart extends ChartWidget
     protected function getData(): array
     {
         $this->getTotalCategoryRanking();
-        $this->getPieLabels();
+        $this->getChartLabels();
         $this->getTotalData();
     
         return [
@@ -84,28 +84,30 @@ class TotalBudgetParentCategoryRankingBarChart extends ChartWidget
     {
         $transactionRepository = new TransactionRepository();
         $transactionService = new TransactionWidgetService();
-        $results = $transactionRepository->getTotalCategoryRanking(['Voyages', 'Virements internes']);
+        $results = $transactionRepository->getMonthlySpendings(['Voyages', 'Virements internes']);
         $improvedResults = $transactionService->addTotalAndPercentage($results);
         $this->rawData = $improvedResults;
     }
 
-    private function getPieLabels(): void
+    private function getChartLabels(): void
     {
         $data = $this->rawData;
         $pieLabels = [];
-        foreach ($data['categories'] as $category) {
-            $pieLabels[] = $category['label'];
+        foreach ($data as $key => $row) {
+            $pieLabels[] = $key;
         }
         $this->pieLabels = $pieLabels;
     }
 
     private function getTotalData(): void
     {
-        $totalData = $totalLabels = [];
         $totalRawData = $this->rawData;
-        foreach ($totalRawData['categories'] as $row) {
+        uasort($totalRawData['parent_categories'], function ($a, $b) {
+            return $b['total'] <=> $a['total'];
+        });
+        foreach ($totalRawData['parent_categories'] as $label => $row) {
             $totalData[] = $row['total'];
-            $totalLabels[] = $row['label'];
+            $totalLabels[] = $label;
             $totalColors[] = $row['color'];
         }
         $this->totalData = $totalData;

@@ -102,7 +102,7 @@ class MonthlyBudgetParentCategoryRankingBarChart extends ChartWidget
     {
         $transactionRepository = new TransactionRepository();
         $transactionService = new TransactionWidgetService();
-        $results = $transactionRepository->getMonthlyCategoryRanking(['Voyages', 'Virements internes']);
+        $results = $transactionRepository->getMonthlySpendings(['Voyages', 'Virements internes']);
         $improvedResults = $transactionService->addPeriodTotalAndPercentage($results);
         array_pop($improvedResults);
         $this->rawData = $improvedResults;

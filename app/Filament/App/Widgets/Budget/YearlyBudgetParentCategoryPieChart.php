@@ -91,7 +91,7 @@ class YearlyBudgetParentCategoryPieChart extends ChartWidget
     {
         $transactionRepository = new TransactionRepository();
         $transactionService = new TransactionWidgetService();
-        $results = $transactionRepository->getYearlySpendingsPerCategory(['Voyages', 'Virements internes']);
+        $results = $transactionRepository->getYearlySpendings(['Voyages', 'Virements internes']);
         $improvedResults = $transactionService->addPeriodTotalAndPercentage($results);
         array_pop($improvedResults);
         $this->rawData = $improvedResults;
@@ -112,9 +112,9 @@ class YearlyBudgetParentCategoryPieChart extends ChartWidget
         $yearlyData = $yearlyLabels = [];
         if (!is_null($year)) {
             $yearlyRawData = $this->rawData[$year];
-            foreach ($yearlyRawData['categories'] as $row) {
+            foreach ($yearlyRawData['parent_categories'] as $label => $row) {
                 $yearlyData[] = $row['percentage'];
-                $yearlyLabels[] = $row['label'];
+                $yearlyLabels[] = $label;
                 $yearlyColors[] = $row['color'];
             }
         }

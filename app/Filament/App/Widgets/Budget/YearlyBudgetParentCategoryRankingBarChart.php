@@ -97,7 +97,7 @@ class YearlyBudgetParentCategoryRankingBarChart extends ChartWidget
     {
         $transactionRepository = new TransactionRepository();
         $transactionService = new TransactionWidgetService();
-        $results = $transactionRepository->getYearlyCategoryRanking(['Voyages', 'Virements internes']);
+        $results = $transactionRepository->getYearlySpendings(['Voyages', 'Virements internes']);
         $improvedResults = $transactionService->addPeriodTotalAndPercentage($results);
         array_pop($improvedResults);
         $this->rawData = $improvedResults;
@@ -118,9 +118,12 @@ class YearlyBudgetParentCategoryRankingBarChart extends ChartWidget
         $yearlyData = $yearlyLabels = [];
         if (!is_null($year)) {
             $yearlyRawData = $this->rawData[$year];
-            foreach ($yearlyRawData['categories'] as $row) {
+            uasort($yearlyRawData['parent_categories'], function ($a, $b) {
+                return $b['total'] <=> $a['total'];
+            });
+            foreach ($yearlyRawData['parent_categories'] as $label => $row) {
                 $yearlyData[] = $row['total'];
-                $yearlyLabels[] = $row['label'];
+                $yearlyLabels[] = $label;
                 $yearlyColors[] = $row['color'];
             }
         }

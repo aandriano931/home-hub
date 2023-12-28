@@ -15,7 +15,7 @@ class BudgetYearlyAnalyse extends Page
     protected static ?string $navigationGroup = 'Budget';
     protected static ?string $navigationLabel = 'Analyse annuelle';
     protected static ?int $navigationSort = 2;
-    protected static ?string $title = 'Analyse annuelle du budget depuis 2020';
+    protected static ?string $title = 'Analyse annuelle du budget';
 
     protected function getHeaderWidgets(): array
     {

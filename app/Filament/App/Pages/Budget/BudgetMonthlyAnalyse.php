@@ -15,7 +15,7 @@ class BudgetMonthlyAnalyse extends Page
     protected static ?string $navigationGroup = 'Budget';
     protected static ?string $navigationLabel = 'Analyse mensuelle';
     protected static ?int $navigationSort = 3;
-    protected static ?string $title = 'Analyse mensuelle du budget depuis Janvier 2020';
+    protected static ?string $title = 'Analyse mensuelle du budget';
 
     protected function getHeaderWidgets(): array
     {

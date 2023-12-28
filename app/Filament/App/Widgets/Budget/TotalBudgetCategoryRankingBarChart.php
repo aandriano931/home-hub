@@ -21,7 +21,7 @@ class TotalBudgetCategoryRankingBarChart extends ChartWidget
     protected function getData(): array
     {
         $this->getTotalCategoryRanking();
-        $this->getPieLabels();
+        $this->getChartLabels();
         $this->getTotalData();
     
         return [
@@ -85,17 +85,17 @@ class TotalBudgetCategoryRankingBarChart extends ChartWidget
     {
         $transactionRepository = new TransactionRepository();
         $transactionService = new TransactionWidgetService();
-        $results = $transactionRepository->getTotalSubCategoryRanking(['Voyages', 'Virements internes']);
+        $results = $transactionRepository->getMonthlySpendings(['Voyages', 'Virements internes']);
         $improvedResults = $transactionService->addTotalAndPercentage($results);
         $this->rawData = $improvedResults;
     }
 
-    private function getPieLabels(): void
+    private function getChartLabels(): void
     {
         $data = $this->rawData;
         $pieLabels = [];
-        foreach ($data['categories'] as $category) {
-            $pieLabels[] = $category['label'];
+        foreach ($data as $key => $row) {
+            $pieLabels[] = $key;
         }
         $this->pieLabels = $pieLabels;
     }

@@ -15,7 +15,7 @@ class BudgetMacroAnalyse extends Page
     protected static ?string $navigationGroup = 'Budget';
     protected static ?string $navigationLabel = 'Analyse macro';
     protected static ?int $navigationSort = 1;
-    protected static ?string $title = 'Analyse macro des données du budget';
+    protected static ?string $title = 'Analyse macro du budget';
 
     protected function getHeaderWidgets(): array
     {

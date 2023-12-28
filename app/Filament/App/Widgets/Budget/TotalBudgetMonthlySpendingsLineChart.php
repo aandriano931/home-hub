@@ -3,6 +3,7 @@
 namespace App\Filament\App\Widgets\Budget;
 
 use App\Repository\Bank\TransactionRepository;
+use App\Services\Bank\TransactionWidgetService;
 use Filament\Support\RawJs;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Carbon;
@@ -11,43 +12,63 @@ class TotalBudgetMonthlySpendingsLineChart extends ChartWidget
 {
     protected static ?string $heading = 'Dépenses mensuelles (hors voyages) et moyenne glissante sur 6 mois';
     protected int | string | array $columnSpan = 'full';
+    private array $rawData = [];
+    private array $pieLabels = [];
+    private array $totalData = [];
 
     protected function getData(): array
     {
-
-        $transactionRepository = new TransactionRepository();
-        $results = $transactionRepository->getMonthlySpendings(['Voyages', 'Virements internes']);
-
-        // Remove last month
-        $results->pop();
-
-        $spendings = $results->map(function ($item) {
-            return $item->total_debit;
-        });
-
-        $labels = $results->map(function ($item) {
-            return ucfirst(trans(Carbon::createFromFormat('Y-m', $item->period)->isoFormat('MMMM Y')));
-        });
-      
+        $this->getTotalSpendings();
+        $this->getChartLabels();
+        $this->getTotalData();
+     
         return [
             'datasets' => [
                 [
                     'label' => 'Total des dépenses mensuelles',
                     'borderColor' => '#EB4936',
                     'backgroundColor' => '#EB4936',
-                    'data' => $spendings,
+                    'data' => $this->totalData,
                     'pointRadius' => 0,
                 ],
                 [
                     'label' => 'Moyenne glissante',
-                    'data' => $this->getEvolutiveMonthlyAverage($spendings->all(), 6),
+                    'data' => $this->getEvolutiveMonthlyAverage($this->totalData, 6),
                     'borderColor' => '#9BD0F5',
                     'backgroundColor' => '#9BD0F5',
                     'pointRadius' => 0,
                 ],
             ],
-            'labels' => $labels,
+            'labels' => $this->pieLabels,
         ];
+    }
+
+    private function getChartLabels(): void
+    {
+        $data = $this->rawData;
+        $pieLabels = [];
+        foreach ($data as $key => $row) {
+            $pieLabels[] = $key;
+        }
+        $this->pieLabels = $pieLabels;
+    }
+
+    private function getTotalSpendings(): void
+    {
+        $transactionRepository = new TransactionRepository();
+        $transactionService = new TransactionWidgetService();
+        $results = $transactionRepository->getMonthlySpendings(['Voyages', 'Virements internes']);
+        $improvedResults = $transactionService->addPeriodTotalAndPercentage($results);
+        $this->rawData = $improvedResults;
+    }
+
+    private function getTotalData(): void
+    {
+        $totalRawData = $this->rawData;
+        foreach ($totalRawData as $period) {
+            $totalData[] = $period['cumulated_total'];
+        }
+        $this->totalData = $totalData;
     }
 
     protected function getType(): string
