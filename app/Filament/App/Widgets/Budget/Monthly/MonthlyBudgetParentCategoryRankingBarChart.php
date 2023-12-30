@@ -1,11 +1,10 @@
 <?php
 
-namespace App\Filament\App\Widgets\Budget;
+namespace App\Filament\App\Widgets\Budget\Monthly;
 
 use App\Repository\Bank\TransactionRepository;
 use Filament\Support\RawJs;
 use Filament\Widgets\ChartWidget;
-use Flowframe\Trend\Trend;
 use Illuminate\Support\Carbon;
 use App\Services\Bank\TransactionWidgetService;
 
@@ -14,7 +13,7 @@ class MonthlyBudgetParentCategoryRankingBarChart extends ChartWidget
     protected static ?string $heading = 'Classement mensuel des dépenses par catégorie';
     protected static ?string $pollingInterval = null;
     private array $rawData = [];
-    private array $pieLabels = [];
+    private array $chartLabels = [];
     private array $monthlyData = [];
     private array $monthlyLabels = [];
     private array $monthlyColors = [];
@@ -22,9 +21,9 @@ class MonthlyBudgetParentCategoryRankingBarChart extends ChartWidget
     protected function getData(): array
     {
         $this->getMonthlyCategoryRanking();
-        $this->getChartLabels();
+        $this->setChartLabels();
         if ($this->filter === null) {
-            $this->filter = end($this->pieLabels);
+            $this->filter = end($this->chartLabels);
         }
         $activeFilter = $this->filter;
         $this->getDataForMonth($activeFilter);
@@ -89,7 +88,7 @@ class MonthlyBudgetParentCategoryRankingBarChart extends ChartWidget
     protected function getFilters(): ?array
     {
         $filters = [];
-        foreach ($this->pieLabels as $label) {
+        foreach ($this->chartLabels as $label) {
             $date = Carbon::createFromFormat('Y-m', $label);
             $formattedDate = $date->isoFormat('MMMM YYYY');
             $filters[$label] = ucfirst(trans($formattedDate));
@@ -108,14 +107,14 @@ class MonthlyBudgetParentCategoryRankingBarChart extends ChartWidget
         $this->rawData = $improvedResults;
     }
 
-    private function getChartLabels(): void
+    private function setChartLabels(): void
     {
         $data = $this->rawData;
-        $pieLabels = [];
+        $chartLabels = [];
         foreach ($data as $key => $row) {
-            $pieLabels[] = $key;
+            $chartLabels[] = $key;
         }
-        $this->pieLabels = $pieLabels;
+        $this->chartLabels = $chartLabels;
     }
 
     private function getDataForMonth(?string $month): void

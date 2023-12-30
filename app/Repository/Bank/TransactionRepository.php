@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 
 class TransactionRepository
 {
-    private const START_DATE = '2020-01-01';
+    private const DEFAULT_START_DATE = '2020-01-01';
     private string $table = "bank_transaction";
 
     /**
@@ -104,7 +104,7 @@ class TransactionRepository
     private function getStartDateString(?DateTime $startDate): string
     {
         if (is_null($startDate)) {
-            $startDate = new DateTime(self::START_DATE);
+            $startDate = new DateTime(self::DEFAULT_START_DATE);
         }
 
         return $startDate->format('Y-m-d');

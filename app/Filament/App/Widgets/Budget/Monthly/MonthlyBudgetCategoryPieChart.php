@@ -1,30 +1,29 @@
 <?php
 
-namespace App\Filament\App\Widgets\Budget;
+namespace App\Filament\App\Widgets\Budget\Monthly;
 
 use App\Repository\Bank\TransactionRepository;
 use Filament\Support\RawJs;
 use Filament\Widgets\ChartWidget;
-use Flowframe\Trend\Trend;
 use Illuminate\Support\Carbon;
 use App\Services\Bank\TransactionWidgetService;
 
-class MonthlyBudgetParentCategoryPieChart extends ChartWidget
+class MonthlyBudgetCategoryPieChart extends ChartWidget
 {
-    protected static ?string $heading = 'Dépenses mensuelles par catégorie';
+    protected static ?string $heading = 'Dépenses mensuelles par sous-catégorie';
     protected static ?string $pollingInterval = null;
     private array $rawData = [];
-    private array $pieLabels = [];
+    private array $chartLabels = [];
     private array $monthlyData = [];
     private array $monthlyLabels = [];
     private array $monthlyColors = [];
 
     protected function getData(): array
     {
-        $this->getMonthlySpendingsPerParentCategoryAndMonth();
-        $this->getPieLabels();
+        $this->getMonthlySpendingsPerSubCategoryAndMonth();
+        $this->setChartLabels();
         if ($this->filter === null) {
-            $this->filter = end($this->pieLabels);
+            $this->filter = end($this->chartLabels);
         }
         $activeFilter = $this->filter;
         $this->getDataForMonth($activeFilter);
@@ -78,7 +77,7 @@ class MonthlyBudgetParentCategoryPieChart extends ChartWidget
     protected function getFilters(): ?array
     {
         $filters = [];
-        foreach ($this->pieLabels as $label) {
+        foreach ($this->chartLabels as $label) {
             $date = Carbon::createFromFormat('Y-m', $label);
             $formattedDate = $date->isoFormat('MMMM YYYY');
             $filters[$label] = ucfirst(trans($formattedDate));
@@ -87,25 +86,24 @@ class MonthlyBudgetParentCategoryPieChart extends ChartWidget
         return $filters;
     }
 
-    private function getMonthlySpendingsPerParentCategoryAndMonth(): void
+    private function getMonthlySpendingsPerSubCategoryAndMonth(): void
     {
         $transactionRepository = new TransactionRepository();
         $transactionService = new TransactionWidgetService();
         $results = $transactionRepository->getMonthlySpendings(['Voyages', 'Virements internes']);
-        // dd($results);
         $improvedResults = $transactionService->addPeriodTotalAndPercentage($results);
         array_pop($improvedResults);
         $this->rawData = $improvedResults;
     }
 
-    private function getPieLabels(): void
+    private function setChartLabels(): void
     {
         $data = $this->rawData;
-        $pieLabels = [];
+        $chartLabels = [];
         foreach ($data as $key => $row) {
-            $pieLabels[] = $key;
+            $chartLabels[] = $key;
         }
-        $this->pieLabels = $pieLabels;
+        $this->chartLabels = $chartLabels;
     }
 
     private function getDataForMonth(?string $month): void
@@ -113,9 +111,9 @@ class MonthlyBudgetParentCategoryPieChart extends ChartWidget
         $monthlyData = $monthlyLabels = [];
         if (!is_null($month)) {
             $monthlyRawData = $this->rawData[$month];
-            foreach ($monthlyRawData['parent_categories'] as $label => $row) {
+            foreach ($monthlyRawData['categories'] as $row) {
                 $monthlyData[] = $row['percentage'];
-                $monthlyLabels[] = $label;
+                $monthlyLabels[] = $row['label'];
                 $monthlyColors[] = $row['color'];
             }
         }

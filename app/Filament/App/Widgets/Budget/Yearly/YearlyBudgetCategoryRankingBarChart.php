@@ -1,30 +1,29 @@
 <?php
 
-namespace App\Filament\App\Widgets\Budget;
+namespace App\Filament\App\Widgets\Budget\Yearly;
 
 use App\Repository\Bank\TransactionRepository;
 use Filament\Support\RawJs;
 use Filament\Widgets\ChartWidget;
-use Flowframe\Trend\Trend;
-use Illuminate\Support\Carbon;
 use App\Services\Bank\TransactionWidgetService;
 
-class YearlyBudgetParentCategoryPieChart extends ChartWidget
+class YearlyBudgetCategoryRankingBarChart extends ChartWidget
 {
-    protected static ?string $heading = 'Dépenses annuelles par catégorie';
+    private const NUMBER_TO_KEEP = 10;
+    protected static ?string $heading = 'Classement annuel des dépenses par sous-catégorie';
     protected static ?string $pollingInterval = null;
     private array $rawData = [];
-    private array $pieLabels = [];
+    private array $chartLabels = [];
     private array $yearlyData = [];
     private array $yearlyLabels = [];
     private array $yearlyColors = [];
 
     protected function getData(): array
     {
-        $this->getYearlySpendingsPerCategoryAndYear();
-        $this->getPieLabels();
+        $this->getYearlyCategoryRanking();
+        $this->setChartLabels();
         if ($this->filter === null) {
-            $this->filter = end($this->pieLabels);
+            $this->filter = end($this->chartLabels);
         }
         $activeFilter = $this->filter;
         $this->getDataForYear($activeFilter);
@@ -32,9 +31,9 @@ class YearlyBudgetParentCategoryPieChart extends ChartWidget
         return [
             'datasets' => [
                 [
-                    'label' => 'Dépenses mensuelles pour ' . $activeFilter,
                     'data' => $this->yearlyData,
                     'backgroundColor' => $this->yearlyColors,
+                    'borderColor' => $this->yearlyColors,
                 ],
             ],
             'labels' => $this->yearlyLabels,
@@ -43,18 +42,22 @@ class YearlyBudgetParentCategoryPieChart extends ChartWidget
 
     protected function getType(): string
     {
-        return 'pie';
+        return 'bar';
     }
 
     protected function getOptions(): RawJs
     {
         return RawJs::make(<<<JS
             {
+                indexAxis: 'y',
                 plugins: {
+                    legend: {
+                        display: false,
+                    },
                     tooltip: {
                         callbacks: {
                             label: function(context) {
-                                return context.label + ' ' + context.formattedValue + '%';
+                                return context.formattedValue + '€';
                             }
                         },
                     },
@@ -62,12 +65,19 @@ class YearlyBudgetParentCategoryPieChart extends ChartWidget
                 scales: {
                     x: {
                         ticks: {
-                            display: false,
+                            callback: function(value, index, values) {
+                                return value + '€';
+                            },
+                            callbacks: {
+                                label: function(context) {
+                                    return context.formattedValue + '€';
+                                }
+                            }
                         },
                     },
                     y: {
                         ticks: {
-                            display: false,
+                            display: true,
                         },
                     },
                 },
@@ -77,17 +87,14 @@ class YearlyBudgetParentCategoryPieChart extends ChartWidget
     
     protected function getFilters(): ?array
     {
-        $filters = [];
-        foreach ($this->pieLabels as $label) {
-            $date = Carbon::createFromFormat('Y', $label);
-            $formattedDate = $date->isoFormat('YYYY');
-            $filters[$label] = $formattedDate;
+        foreach ($this->chartLabels as $label) {
+            $filters[$label] = $label;
         }
 
         return $filters;
     }
 
-    private function getYearlySpendingsPerCategoryAndYear(): void
+    private function getYearlyCategoryRanking(): void
     {
         $transactionRepository = new TransactionRepository();
         $transactionService = new TransactionWidgetService();
@@ -97,14 +104,14 @@ class YearlyBudgetParentCategoryPieChart extends ChartWidget
         $this->rawData = $improvedResults;
     }
 
-    private function getPieLabels(): void
+    private function setChartLabels(): void
     {
         $data = $this->rawData;
-        $pieLabels = [];
+        $chartLabels = [];
         foreach ($data as $key => $row) {
-            $pieLabels[] = $key;
+            $chartLabels[] = $key;
         }
-        $this->pieLabels = $pieLabels;
+        $this->chartLabels = $chartLabels;
     }
 
     private function getDataForYear(?string $year): void
@@ -112,9 +119,13 @@ class YearlyBudgetParentCategoryPieChart extends ChartWidget
         $yearlyData = $yearlyLabels = [];
         if (!is_null($year)) {
             $yearlyRawData = $this->rawData[$year];
-            foreach ($yearlyRawData['parent_categories'] as $label => $row) {
-                $yearlyData[] = $row['percentage'];
-                $yearlyLabels[] = $label;
+            usort($yearlyRawData['categories'], function ($a, $b) {
+                return $b['total'] <=> $a['total'];
+            });
+            $topCategories = array_slice($yearlyRawData['categories'], 0, self::NUMBER_TO_KEEP);
+            foreach ($topCategories as $row) {
+                $yearlyData[] = $row['total'];
+                $yearlyLabels[] = $row['label'];
                 $yearlyColors[] = $row['color'];
             }
         }

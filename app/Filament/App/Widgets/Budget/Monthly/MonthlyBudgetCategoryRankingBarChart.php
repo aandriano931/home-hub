@@ -1,41 +1,43 @@
 <?php
 
-namespace App\Filament\App\Widgets\Budget;
+namespace App\Filament\App\Widgets\Budget\Monthly;
 
 use App\Repository\Bank\TransactionRepository;
 use Filament\Support\RawJs;
 use Filament\Widgets\ChartWidget;
+use Illuminate\Support\Carbon;
 use App\Services\Bank\TransactionWidgetService;
 
-class YearlyBudgetParentCategoryRankingBarChart extends ChartWidget
+class MonthlyBudgetCategoryRankingBarChart extends ChartWidget
 {
-    protected static ?string $heading = 'Classement annuel des dépenses par catégorie';
+    private const NUMBER_TO_KEEP = 10;
+    protected static ?string $heading = 'Classement mensuel des dépenses par sous-catégorie';
     protected static ?string $pollingInterval = null;
     private array $rawData = [];
-    private array $pieLabels = [];
-    private array $yearlyData = [];
-    private array $yearlyLabels = [];
-    private array $yearlyColors = [];
+    private array $chartLabels = [];
+    private array $monthlyData = [];
+    private array $monthlyLabels = [];
+    private array $monthlyColors = [];
 
     protected function getData(): array
     {
-        $this->getYearlyCategoryRanking();
-        $this->getPieLabels();
+        $this->getMonthlySubCategoryRanking();
+        $this->setChartLabels();
         if ($this->filter === null) {
-            $this->filter = end($this->pieLabels);
+            $this->filter = end($this->chartLabels);
         }
         $activeFilter = $this->filter;
-        $this->getDataForYear($activeFilter);
+        $this->getDataForMonth($activeFilter);
     
         return [
             'datasets' => [
                 [
-                    'data' => $this->yearlyData,
-                    'backgroundColor' => $this->yearlyColors,
-                    'borderColor' => $this->yearlyColors,
+                    'data' => $this->monthlyData,
+                    'backgroundColor' => $this->monthlyColors,
+                    'borderColor' => $this->monthlyColors,
                 ],
             ],
-            'labels' => $this->yearlyLabels,
+            'labels' => $this->monthlyLabels,
         ];
     }
 
@@ -86,50 +88,54 @@ class YearlyBudgetParentCategoryRankingBarChart extends ChartWidget
     
     protected function getFilters(): ?array
     {
-        foreach ($this->pieLabels as $label) {
-            $filters[$label] = $label;
+        $filters = [];
+        foreach ($this->chartLabels as $label) {
+            $date = Carbon::createFromFormat('Y-m', $label);
+            $formattedDate = $date->isoFormat('MMMM YYYY');
+            $filters[$label] = ucfirst(trans($formattedDate));
         }
 
         return $filters;
     }
 
-    private function getYearlyCategoryRanking(): void
+    private function getMonthlySubCategoryRanking(): void
     {
         $transactionRepository = new TransactionRepository();
         $transactionService = new TransactionWidgetService();
-        $results = $transactionRepository->getYearlySpendings(['Voyages', 'Virements internes']);
+        $results = $transactionRepository->getMonthlySpendings(['Voyages', 'Virements internes']);
         $improvedResults = $transactionService->addPeriodTotalAndPercentage($results);
         array_pop($improvedResults);
         $this->rawData = $improvedResults;
     }
 
-    private function getPieLabels(): void
+    private function setChartLabels(): void
     {
         $data = $this->rawData;
-        $pieLabels = [];
+        $chartLabels = [];
         foreach ($data as $key => $row) {
-            $pieLabels[] = $key;
+            $chartLabels[] = $key;
         }
-        $this->pieLabels = $pieLabels;
+        $this->chartLabels = $chartLabels;
     }
 
-    private function getDataForYear(?string $year): void
+    private function getDataForMonth(?string $month): void
     {
-        $yearlyData = $yearlyLabels = [];
-        if (!is_null($year)) {
-            $yearlyRawData = $this->rawData[$year];
-            uasort($yearlyRawData['parent_categories'], function ($a, $b) {
+        $monthlyData = $monthlyLabels = [];
+        if (!is_null($month)) {
+            $monthlyRawData = $this->rawData[$month];
+            usort($monthlyRawData['categories'], function ($a, $b) {
                 return $b['total'] <=> $a['total'];
             });
-            foreach ($yearlyRawData['parent_categories'] as $label => $row) {
-                $yearlyData[] = $row['total'];
-                $yearlyLabels[] = $label;
-                $yearlyColors[] = $row['color'];
+            $topCategories = array_slice($monthlyRawData['categories'], 0, self::NUMBER_TO_KEEP);
+            foreach ($topCategories as $row) {
+                $monthlyData[] = $row['total'];
+                $monthlyLabels[] = $row['label'];
+                $monthlyColors[] = $row['color'];
             }
         }
-        $this->yearlyData = $yearlyData;
-        $this->yearlyLabels = $yearlyLabels;
-        $this->yearlyColors = $yearlyColors;
+        $this->monthlyData = $monthlyData;
+        $this->monthlyLabels = $monthlyLabels;
+        $this->monthlyColors = $monthlyColors;
     }
 
 }

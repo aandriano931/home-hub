@@ -1,14 +1,13 @@
 <?php
 
-namespace App\Filament\App\Widgets\Budget;
+namespace App\Filament\App\Widgets\Budget\Macro;
 
 use App\Repository\Bank\TransactionRepository;
-use App\Services\Bank\TransactionWidgetService;
 use Filament\Support\RawJs;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Carbon;
 
-class TotalBudgetMonthlyCategorySpendingsLineChart extends ChartWidget
+class MacroBudgetMonthlyCategorySpendingsLineChart extends ChartWidget
 {
     private const CATEGORY_THRESHOLD = 3;
     protected static ?string $heading = 'Top '. self::CATEGORY_THRESHOLD . ' des dépenses par sous-catégories (hors voyages)';
@@ -20,12 +19,10 @@ class TotalBudgetMonthlyCategorySpendingsLineChart extends ChartWidget
     protected function getData(): array
     {
         $transactionRepository = new TransactionRepository();
-        $transactionService = new TransactionWidgetService();
         $results = $transactionRepository->getMonthlySpendings(['Voyages', 'Virements internes']);
-        $sortedResults = $transactionService->sortPerMonthAndCategory($results);
-        $categories = $this->extractCategoriesAndColors($sortedResults);
+        $categories = $this->extractCategoriesAndColors($results->all());
         $data = $this->initializeDataWithCategories($categories);
-        $this->generateDatasetsAndLabels($sortedResults, $data, $categories);
+        $this->generateDatasetsAndLabels($results->all(), $data, $categories);
             
         return [
             'datasets' => $this->datasets,

@@ -2,9 +2,11 @@
 
 namespace App\Providers\Filament;
 
+use Filament\Facades\Filament;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\NavigationGroup;
 use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -29,12 +31,18 @@ class AppPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Blue,
             ])
+            ->navigationGroups([
+                NavigationGroup::make()
+                    ->label('Budget')
+                    ->icon('heroicon-s-currency-euro')
+                    ->collapsed(),
+            ])
             ->discoverResources(in: app_path('Filament/App/Resources'), for: 'App\\Filament\\App\\Resources')
             ->discoverPages(in: app_path('Filament/App/Pages/*'), for: 'App\\Filament\\App\\Pages\\*')
             ->pages([
                 Pages\Dashboard::class,
             ])
-            ->discoverWidgets(in: app_path('Filament/App/Widgets/*'), for: 'App\\Filament\\App\\Widgets\\*')
+            ->discoverWidgets(in: app_path('Filament/App/Widgets/Budget/*'), for: 'App\\Filament\\App\\Widgets\\Budget\\*')
             ->widgets([
                 Widgets\AccountWidget::class,
             ])

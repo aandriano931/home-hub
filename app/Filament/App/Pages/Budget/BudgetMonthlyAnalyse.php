@@ -2,20 +2,20 @@
 
 namespace App\Filament\App\Pages\Budget;
 
-use App\Filament\App\Widgets\Budget\MonthlyBudgetCategoryPieChart;
-use App\Filament\App\Widgets\Budget\MonthlyBudgetCategoryRankingBarChart;
-use App\Filament\App\Widgets\Budget\MonthlyBudgetParentCategoryPieChart;
-use App\Filament\App\Widgets\Budget\MonthlyBudgetParentCategoryRankingBarChart;
+use App\Filament\App\Widgets\Budget\Monthly\MonthlyBudgetCategoryPieChart;
+use App\Filament\App\Widgets\Budget\Monthly\MonthlyBudgetCategoryRankingBarChart;
+use App\Filament\App\Widgets\Budget\Monthly\MonthlyBudgetParentCategoryPieChart;
+use App\Filament\App\Widgets\Budget\Monthly\MonthlyBudgetParentCategoryRankingBarChart;
 use Filament\Pages\Page;
 
 class BudgetMonthlyAnalyse extends Page
 {
-    protected static ?string $navigationIcon = 'heroicon-o-presentation-chart-line';
     protected static string $view = 'filament.app.pages.budget-yearly-analyse';
     protected static ?string $navigationGroup = 'Budget';
     protected static ?string $navigationLabel = 'Analyse mensuelle';
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 1;
     protected static ?string $title = 'Analyse mensuelle du budget';
+    protected ?string $subheading = 'Analyse des dépenses mensuelles sur le compte joint depuis janvier 2020';
 
     protected function getHeaderWidgets(): array
     {

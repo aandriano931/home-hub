@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\App\Widgets\Budget;
+namespace App\Filament\App\Widgets\Budget\Macro;
 
 use App\Repository\Bank\TransactionRepository;
 use App\Services\Bank\TransactionWidgetService;
@@ -8,7 +8,7 @@ use Filament\Support\RawJs;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Carbon;
 
-class TotalBudgetMonthlyParentCategorySpendingsLineChart extends ChartWidget
+class MacroBudgetMonthlyParentCategorySpendingsLineChart extends ChartWidget
 {
     private const CATEGORY_THRESHOLD = 3;
     protected static ?string $heading = 'Top '. self::CATEGORY_THRESHOLD . ' des dépenses par catégories (hors voyages)';

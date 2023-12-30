@@ -37,7 +37,10 @@ class TransactionWidgetService
         }
         foreach ($improvedTransactionsCollection['categories'] as &$category) {
             $category['percentage'] = round(($category['total'] / $improvedTransactionsCollection['cumulated_total']) * 100, 2);
-            $this->addParentCategoriesTotalAndPercentage($improvedTransactionsCollection['parent_categories'], $category);
+            $this->addParentCategoriesTotal($improvedTransactionsCollection['parent_categories'], $category);
+        }
+        foreach ($improvedTransactionsCollection['parent_categories'] as &$parentCategory) {
+            $parentCategory['percentage'] = round(($parentCategory['total'] / $improvedTransactionsCollection['cumulated_total']) * 100, 2);
         }
 
         return $improvedTransactionsCollection;
@@ -75,10 +78,10 @@ class TransactionWidgetService
             'parent_color' => $result->parent_color,
         ];
         $collection['categories'][] = $categoryData;
-        $this->addParentCategoriesTotalAndPercentage($collection['parent_categories'], $categoryData);
+        $this->addParentCategoriesTotal($collection['parent_categories'], $categoryData);
     }
     
-    private function addParentCategoriesTotalAndPercentage(array &$parentCategories, array $categoryData): void {
+    private function addParentCategoriesTotal(array &$parentCategories, array $categoryData): void {
         if (isset($parentCategories[$categoryData['parent_label']])) {
             $parentCategories[$categoryData['parent_label']]['total'] = $parentCategories[$categoryData['parent_label']]['total'] + $categoryData['total'];
         } else {

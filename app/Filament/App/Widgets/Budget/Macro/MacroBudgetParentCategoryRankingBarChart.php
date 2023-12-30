@@ -1,32 +1,29 @@
 <?php
 
-namespace App\Filament\App\Widgets\Budget;
+namespace App\Filament\App\Widgets\Budget\Macro;
 
 use App\Repository\Bank\TransactionRepository;
 use Filament\Support\RawJs;
 use Filament\Widgets\ChartWidget;
 use App\Services\Bank\TransactionWidgetService;
 
-class TotalBudgetParentCategoryRankingBarChart extends ChartWidget
+class MacroBudgetParentCategoryRankingBarChart extends ChartWidget
 {
     protected static ?string $heading = 'Classement des dépenses par catégorie (hors voyages)';
     protected static ?string $pollingInterval = null;
-    private array $rawData = [];
-    private array $pieLabels = [];
-    private array $totalData = [];
+    private array $chartData = [];
     private array $totalLabels = [];
     private array $totalColors = [];
 
     protected function getData(): array
     {
-        $this->getTotalCategoryRanking();
-        $this->getChartLabels();
-        $this->getTotalData();
+        $results = $this->getTotalCategoryRanking();
+        $this->setChartData($results);
     
         return [
             'datasets' => [
                 [
-                    'data' => $this->totalData,
+                    'data' => $this->chartData,
                     'backgroundColor' => $this->totalColors,
                     'borderColor' => $this->totalColors,
                 ],
@@ -80,37 +77,26 @@ class TotalBudgetParentCategoryRankingBarChart extends ChartWidget
         JS);
     }
     
-    private function getTotalCategoryRanking(): void
+    private function getTotalCategoryRanking(): array
     {
         $transactionRepository = new TransactionRepository();
         $transactionService = new TransactionWidgetService();
         $results = $transactionRepository->getMonthlySpendings(['Voyages', 'Virements internes']);
-        $improvedResults = $transactionService->addTotalAndPercentage($results);
-        $this->rawData = $improvedResults;
+
+        return $transactionService->addTotalAndPercentage($results);
     }
 
-    private function getChartLabels(): void
+    private function setChartData(array $data): void
     {
-        $data = $this->rawData;
-        $pieLabels = [];
-        foreach ($data as $key => $row) {
-            $pieLabels[] = $key;
-        }
-        $this->pieLabels = $pieLabels;
-    }
-
-    private function getTotalData(): void
-    {
-        $totalRawData = $this->rawData;
-        uasort($totalRawData['parent_categories'], function ($a, $b) {
+        uasort($data['parent_categories'], function ($a, $b) {
             return $b['total'] <=> $a['total'];
         });
-        foreach ($totalRawData['parent_categories'] as $label => $row) {
-            $totalData[] = $row['total'];
+        foreach ($data['parent_categories'] as $label => $row) {
+            $chartData[] = $row['total'];
             $totalLabels[] = $label;
             $totalColors[] = $row['color'];
         }
-        $this->totalData = $totalData;
+        $this->chartData = $chartData;
         $this->totalLabels = $totalLabels;
         $this->totalColors = $totalColors;
     }
