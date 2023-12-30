@@ -2,9 +2,11 @@
 
 namespace App\Filament\App\Pages\Budget;
 
+use App\Filament\App\Widgets\Budget\Macro\MacroBudgetCategoryLineChart;
 use App\Filament\App\Widgets\Budget\Macro\MacroBudgetCategoryPieChart;
 use App\Filament\App\Widgets\Budget\Macro\MacroBudgetCategoryRankingBarChart;
 use App\Filament\App\Widgets\Budget\Macro\MacroBudgetGlobalLineChart;
+use App\Filament\App\Widgets\Budget\Macro\MacroBudgetParentCategoryLineChart;
 use App\Filament\App\Widgets\Budget\Macro\MacroBudgetParentCategoryPieChart;
 use App\Filament\App\Widgets\Budget\Macro\MacroBudgetParentCategoryRankingBarChart;
 use Filament\Pages\Page;
@@ -26,6 +28,8 @@ class BudgetMacroAnalyse extends Page
             MacroBudgetCategoryRankingBarChart::class,
             MacroBudgetParentCategoryPieChart::class,
             MacroBudgetCategoryPieChart::class,
+            MacroBudgetParentCategoryLineChart::class,
+            MacroBudgetCategoryLineChart::class,
         ];
     }
 }
