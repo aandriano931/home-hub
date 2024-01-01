@@ -2,82 +2,34 @@
 
 namespace App\Filament\App\Widgets\Budget\Macro;
 
-use App\Repository\Bank\TransactionRepository;
-use Filament\Support\RawJs;
-use Filament\Widgets\ChartWidget;
-use App\Services\Bank\TransactionWidgetService;
+use App\Filament\App\Widgets\Budget\AbstractBudgetPieChart;
 
-class MacroBudgetCategoryPieChart extends ChartWidget
+class MacroBudgetCategoryPieChart extends AbstractBudgetPieChart
 {
     private const SUBCATEGORY_MINIMUM_THRESHOLD = 0.5;
     protected static ?string $heading = 'Part des dépenses totales par sous-catégorie (>=' . self::SUBCATEGORY_MINIMUM_THRESHOLD . '%)';
     protected static ?string $pollingInterval = null;
-    private array $chartData = [];
-    private array $totalLabels = [];
-    private array $totalColors = [];
-
+    
     protected function getData(): array
     {
-        $results = $this->getTotalSpendingsPerSubCategory();
-        $this->setChartData($results);
+        $results = $this->getMacroSpendings();
+        $chartData = $this->getChartData($results);
     
         return [
             'datasets' => [
                 [
                     'label' => 'Dépenses totales par sous-catégorie',
-                    'data' => $this->chartData,
-                    'backgroundColor' => $this->totalColors,
+                    'data' => $chartData['data'],
+                    'backgroundColor' => $chartData['colors'],
                 ],
             ],
-            'labels' => $this->totalLabels,
+            'labels' => $chartData['labels'],
         ];
     }
 
-    protected function getType(): string
+    private function getChartData(array $data): array
     {
-        return 'pie';
-    }
-
-    protected function getOptions(): RawJs
-    {
-        return RawJs::make(<<<JS
-            {
-                plugins: {
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return context.label + ' ' + context.formattedValue + '%';
-                            }
-                        },
-                    },
-                },
-                scales: {
-                    x: {
-                        ticks: {
-                            display: false,
-                        },
-                    },
-                    y: {
-                        ticks: {
-                            display: false,
-                        },
-                    },
-                },
-            }
-        JS);
-    }
-    
-    private function getTotalSpendingsPerSubCategory(): array
-    {
-        $transactionRepository = new TransactionRepository();
-        $transactionService = new TransactionWidgetService();
-        $results = $transactionRepository->getMonthlySpendings(['Voyages', 'Virements internes']);
-
-        return $transactionService->addTotalAndPercentage($results);
-    }
-
-    private function setChartData(array $data): void
-    {
+        $chartData = [];
         usort($data['categories'], function ($a, $b) {
             return $a['parent_label'] <=> $b['parent_label'];
         });
@@ -86,14 +38,12 @@ class MacroBudgetCategoryPieChart extends ChartWidget
             return $row['percentage'] >= self::SUBCATEGORY_MINIMUM_THRESHOLD;
         });
         foreach ($data['categories'] as $row) {
-            $chartData[] = $row['percentage'];
-            $totalLabels[] = $row['label'];
-            $totalColors[] = $row['color'];
+            $chartData['data'][] = $row['percentage'];
+            $chartData['labels'][] = $row['label'];
+            $chartData['colors'][] = $row['color'];
         }
 
-        $this->chartData = $chartData;
-        $this->totalLabels = $totalLabels;
-        $this->totalColors = $totalColors;
+        return $chartData;
     }
 
 }

@@ -2,90 +2,40 @@
 
 namespace App\Filament\App\Widgets\Budget\Macro;
 
-use App\Repository\Bank\TransactionRepository;
-use Filament\Support\RawJs;
-use Filament\Widgets\ChartWidget;
-use App\Services\Bank\TransactionWidgetService;
+use App\Filament\App\Widgets\Budget\AbstractBudgetPieChart;
 
-class MacroBudgetParentCategoryPieChart extends ChartWidget
+class MacroBudgetParentCategoryPieChart extends AbstractBudgetPieChart
 {
     protected static ?string $heading = 'Part des dépenses totales par catégorie';
     protected static ?string $pollingInterval = null;
-    private array $chartData = [];
-    private array $totalLabels = [];
-    private array $totalColors = [];
-
     protected function getData(): array
     {
-        $result = $this->getTotalSpendingsPerCategory();
-        $this->setChartData($result);
+        $results = $this->getMacroSpendings();
+        $chartData = $this->getChartData($results);
     
         return [
             'datasets' => [
                 [
                     'label' => 'Dépenses totales par catégorie',
-                    'data' => $this->chartData,
-                    'backgroundColor' => $this->totalColors,
+                    'data' => $chartData['data'],
+                    'backgroundColor' => $chartData['colors'],
                 ],
             ],
-            'labels' => $this->totalLabels,
+            'labels' => $chartData['labels'],
         ];
     }
 
-    protected function getType(): string
+    private function getChartData(array $data): array
     {
-        return 'pie';
-    }
-
-    protected function getOptions(): RawJs
-    {
-        return RawJs::make(<<<JS
-            {
-                plugins: {
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return context.label + ' ' + context.formattedValue + '%';
-                            }
-                        },
-                    },
-                },
-                scales: {
-                    x: {
-                        ticks: {
-                            display: false,
-                        },
-                    },
-                    y: {
-                        ticks: {
-                            display: false,
-                        },
-                    },
-                },
-            }
-        JS);
-    }
-    
-    private function getTotalSpendingsPerCategory(): array
-    {
-        $transactionRepository = new TransactionRepository();
-        $transactionService = new TransactionWidgetService();
-        $results = $transactionRepository->getMonthlySpendings(['Voyages', 'Virements internes']);
-        
-        return $transactionService->addTotalAndPercentage($results);
-    }
-
-    private function setChartData(array $data): void
-    {
+        $chartData = [];
         ksort($data['parent_categories']);
         foreach ($data['parent_categories'] as $key => $row) {
-            $chartData[] = $row['percentage'];
-            $totalLabels[] = $key;
-            $totalColors[] = $row['color'];
+            $chartData['data'][] = $row['percentage'];
+            $chartData['labels'][] = $key;
+            $chartData['colors'][] = $row['color'];
         }
-        $this->chartData = $chartData;
-        $this->totalLabels = $totalLabels;
-        $this->totalColors = $totalColors;
+        
+        return $chartData;
     }
 
 }

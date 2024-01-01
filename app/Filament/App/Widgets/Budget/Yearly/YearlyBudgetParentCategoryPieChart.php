@@ -2,78 +2,36 @@
 
 namespace App\Filament\App\Widgets\Budget\Yearly;
 
-use App\Repository\Bank\TransactionRepository;
-use Filament\Support\RawJs;
-use Filament\Widgets\ChartWidget;
+use App\Filament\App\Widgets\Budget\AbstractBudgetPieChart;
 use Illuminate\Support\Carbon;
-use App\Services\Bank\TransactionWidgetService;
 
-class YearlyBudgetParentCategoryPieChart extends ChartWidget
+class YearlyBudgetParentCategoryPieChart extends AbstractBudgetPieChart
 {
     protected static ?string $heading = 'Dépenses annuelles par catégorie';
     protected static ?string $pollingInterval = null;
-    private array $rawData = [];
-    private array $chartLabels = [];
-    private array $yearlyData = [];
-    private array $yearlyLabels = [];
-    private array $yearlyColors = [];
 
     protected function getData(): array
     {
-        $this->getYearlySpendingsPerCategoryAndYear();
-        $this->setChartLabels();
+        $yearlyData = $this->getYearlySpendings();
+        $this->getChartLabels($yearlyData);
         if ($this->filter === null) {
             $this->filter = end($this->chartLabels);
         }
         $activeFilter = $this->filter;
-        $this->getDataForYear($activeFilter);
+        $chartData = $this->getChartData($yearlyData, $activeFilter);
     
         return [
             'datasets' => [
                 [
-                    'label' => 'Dépenses mensuelles pour ' . $activeFilter,
-                    'data' => $this->yearlyData,
-                    'backgroundColor' => $this->yearlyColors,
+                    'label' => 'Dépenses annuelles pour ' . $activeFilter,
+                    'data' => $chartData['data'],
+                    'backgroundColor' => $chartData['colors'],
                 ],
             ],
-            'labels' => $this->yearlyLabels,
+            'labels' => $chartData['labels'],
         ];
     }
 
-    protected function getType(): string
-    {
-        return 'pie';
-    }
-
-    protected function getOptions(): RawJs
-    {
-        return RawJs::make(<<<JS
-            {
-                plugins: {
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return context.label + ' ' + context.formattedValue + '%';
-                            }
-                        },
-                    },
-                },
-                scales: {
-                    x: {
-                        ticks: {
-                            display: false,
-                        },
-                    },
-                    y: {
-                        ticks: {
-                            display: false,
-                        },
-                    },
-                },
-            }
-        JS);
-    }
-    
     protected function getFilters(): ?array
     {
         $filters = [];
@@ -86,40 +44,19 @@ class YearlyBudgetParentCategoryPieChart extends ChartWidget
         return $filters;
     }
 
-    private function getYearlySpendingsPerCategoryAndYear(): void
+    private function getChartData(array $data, ?string $year): array
     {
-        $transactionRepository = new TransactionRepository();
-        $transactionService = new TransactionWidgetService();
-        $results = $transactionRepository->getYearlySpendings(['Voyages', 'Virements internes']);
-        $improvedResults = $transactionService->addPeriodTotalAndPercentage($results);
-        array_pop($improvedResults);
-        $this->rawData = $improvedResults;
-    }
-
-    private function setChartLabels(): void
-    {
-        $data = $this->rawData;
-        $chartLabels = [];
-        foreach ($data as $key => $row) {
-            $chartLabels[] = $key;
-        }
-        $this->chartLabels = $chartLabels;
-    }
-
-    private function getDataForYear(?string $year): void
-    {
-        $yearlyData = $yearlyLabels = [];
+        $chartData = [];
         if (!is_null($year)) {
-            $yearlyRawData = $this->rawData[$year];
+            $yearlyRawData = $data[$year];
             foreach ($yearlyRawData['parent_categories'] as $label => $row) {
-                $yearlyData[] = $row['percentage'];
-                $yearlyLabels[] = $label;
-                $yearlyColors[] = $row['color'];
+                $chartData['data'][] = $row['percentage'];
+                $chartData['labels'][] = $label;
+                $chartData['colors'][] = $row['color'];
             }
         }
-        $this->yearlyData = $yearlyData;
-        $this->yearlyLabels = $yearlyLabels;
-        $this->yearlyColors = $yearlyColors;
+        
+        return $chartData;
     }
 
 }

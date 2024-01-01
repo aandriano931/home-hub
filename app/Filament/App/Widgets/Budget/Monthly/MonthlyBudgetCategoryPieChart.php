@@ -2,78 +2,36 @@
 
 namespace App\Filament\App\Widgets\Budget\Monthly;
 
-use App\Repository\Bank\TransactionRepository;
-use Filament\Support\RawJs;
-use Filament\Widgets\ChartWidget;
+use App\Filament\App\Widgets\Budget\AbstractBudgetPieChart;
 use Illuminate\Support\Carbon;
-use App\Services\Bank\TransactionWidgetService;
 
-class MonthlyBudgetCategoryPieChart extends ChartWidget
+class MonthlyBudgetCategoryPieChart extends AbstractBudgetPieChart
 {
     protected static ?string $heading = 'Dépenses mensuelles par sous-catégorie';
     protected static ?string $pollingInterval = null;
-    private array $rawData = [];
-    private array $chartLabels = [];
-    private array $monthlyData = [];
-    private array $monthlyLabels = [];
-    private array $monthlyColors = [];
 
     protected function getData(): array
     {
-        $this->getMonthlySpendingsPerSubCategoryAndMonth();
-        $this->setChartLabels();
+        $monthlyData = $this->getMonthlySpendings();
+        $this->getChartLabels($monthlyData);
         if ($this->filter === null) {
             $this->filter = end($this->chartLabels);
         }
         $activeFilter = $this->filter;
-        $this->getDataForMonth($activeFilter);
+        $chartData = $this->getChartData($monthlyData, $activeFilter);
     
         return [
             'datasets' => [
                 [
                     'label' => 'Dépenses mensuelles pour ' . $activeFilter,
-                    'data' => $this->monthlyData,
-                    'backgroundColor' => $this->monthlyColors,
+                    'data' => $chartData['data'],
+                    'backgroundColor' => $chartData['colors'],
                 ],
             ],
-            'labels' => $this->monthlyLabels,
+            'labels' => $chartData['labels'],
         ];
     }
-
-    protected function getType(): string
-    {
-        return 'pie';
-    }
-
-    protected function getOptions(): RawJs
-    {
-        return RawJs::make(<<<JS
-            {
-                plugins: {
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return context.label + ' ' + context.formattedValue + '%';
-                            }
-                        },
-                    },
-                },
-                scales: {
-                    x: {
-                        ticks: {
-                            display: false,
-                        },
-                    },
-                    y: {
-                        ticks: {
-                            display: false,
-                        },
-                    },
-                },
-            }
-        JS);
-    }
-    
+  
     protected function getFilters(): ?array
     {
         $filters = [];
@@ -86,40 +44,19 @@ class MonthlyBudgetCategoryPieChart extends ChartWidget
         return $filters;
     }
 
-    private function getMonthlySpendingsPerSubCategoryAndMonth(): void
+    private function getChartData(array $data, ?string $filter): array
     {
-        $transactionRepository = new TransactionRepository();
-        $transactionService = new TransactionWidgetService();
-        $results = $transactionRepository->getMonthlySpendings(['Voyages', 'Virements internes']);
-        $improvedResults = $transactionService->addPeriodTotalAndPercentage($results);
-        array_pop($improvedResults);
-        $this->rawData = $improvedResults;
-    }
-
-    private function setChartLabels(): void
-    {
-        $data = $this->rawData;
-        $chartLabels = [];
-        foreach ($data as $key => $row) {
-            $chartLabels[] = $key;
-        }
-        $this->chartLabels = $chartLabels;
-    }
-
-    private function getDataForMonth(?string $month): void
-    {
-        $monthlyData = $monthlyLabels = [];
-        if (!is_null($month)) {
-            $monthlyRawData = $this->rawData[$month];
+        $chartData = [];
+        if (!is_null($filter)) {
+            $monthlyRawData = $data[$filter];
             foreach ($monthlyRawData['categories'] as $row) {
-                $monthlyData[] = $row['percentage'];
-                $monthlyLabels[] = $row['label'];
-                $monthlyColors[] = $row['color'];
+                $chartData['data'][] = $row['percentage'];
+                $chartData['labels'][] = $row['label'];
+                $chartData['colors'][] = $row['color'];
             }
         }
-        $this->monthlyData = $monthlyData;
-        $this->monthlyLabels = $monthlyLabels;
-        $this->monthlyColors = $monthlyColors;
+
+        return $chartData;
     }
 
 }

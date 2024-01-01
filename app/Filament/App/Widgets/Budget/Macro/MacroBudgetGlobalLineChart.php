@@ -2,14 +2,13 @@
 
 namespace App\Filament\App\Widgets\Budget\Macro;
 
+use App\Filament\App\Widgets\Budget\AbstractBudgetLineChart;
 use App\Repository\Bank\TransactionRepository;
 use App\Services\Bank\TransactionWidgetService;
-use Filament\Support\RawJs;
-use Filament\Widgets\ChartWidget;
 
-class MacroBudgetGlobalLineChart extends ChartWidget
+class MacroBudgetGlobalLineChart extends AbstractBudgetLineChart
 {
-    private const MOVING_AVERAGE_WINDOW = 6;
+    protected const MOVING_AVERAGE_WINDOW = 6;
     private const SPENDINGS_COLOR = '#8D0C04';
     private const INCOMES_COLOR = '#2ECF53';
     private const AVERAGE_SPENDING_COLOR = '#083BCE';
@@ -49,7 +48,7 @@ class MacroBudgetGlobalLineChart extends ChartWidget
                 ],
                 [
                     'label' => 'Moyenne glissante des dépenses',
-                    'data' => $this->getEvolutiveMonthlyAverage($this->spendingsData, self::MOVING_AVERAGE_WINDOW),
+                    'data' => $this->getMovingAverages($this->spendingsData),
                     'borderColor' => self::AVERAGE_SPENDING_COLOR,
                     'backgroundColor' => self::AVERAGE_SPENDING_COLOR,
                     'pointBackgroundColor' => self::AVERAGE_SPENDING_COLOR,
@@ -84,45 +83,4 @@ class MacroBudgetGlobalLineChart extends ChartWidget
         $this->incomesData = $incomesData;
     }
 
-    protected function getType(): string
-    {
-        return 'line';
-    }
-
-    protected function getOptions(): RawJs
-    {
-        return RawJs::make(<<<JS
-            {
-                plugins: {
-                    legend: {
-                        display: true,
-                    },
-                },
-                scales: {
-                    y: {
-                        ticks: {
-                            callback: function(value, index, values) {
-                                return value + '€';
-                            }
-                        },
-                    },
-                },
-            }
-        JS);
-    }
-
-    private function getEvolutiveMonthlyAverage(array $monthlyValues, int $window): array
-    {
-        $sum = 0;
-        for ($i = 0; $i < $window; $i++) {
-            $sum += $monthlyValues[$i];
-            $movingMonthlyAverages[] = $sum / ($i + 1);
-        }
-        for ($i = $window; $i < count($monthlyValues); $i++) {
-            $sum = $sum - $monthlyValues[$i - $window] + $monthlyValues[$i];
-            $movingMonthlyAverages[] = $sum / $window;
-        }
-
-        return $movingMonthlyAverages;
-    }
 }
