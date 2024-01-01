@@ -7,26 +7,30 @@ use Filament\Support\RawJs;
 use Filament\Widgets\ChartWidget;
 use App\Services\Bank\TransactionWidgetService;
 
-abstract class AbstractBudgetPieChart extends ChartWidget
+abstract class AbstractBudgetRankingBarChart extends ChartWidget
 {
+    protected const EXCLUDED_CATEGORIES = ['Voyages', 'Virements internes'];
     protected static ?string $pollingInterval = null;
     protected array $chartLabels = [];
-    protected const EXCLUDED_CATEGORIES = ['Voyages', 'Virements internes'];
 
     protected function getType(): string
     {
-        return 'pie';
+        return 'bar';
     }
 
     protected function getOptions(): RawJs
     {
         return RawJs::make(<<<JS
             {
+                indexAxis: 'y',
                 plugins: {
+                    legend: {
+                        display: false,
+                    },
                     tooltip: {
                         callbacks: {
                             label: function(context) {
-                                return context.label + ' ' + context.formattedValue + '%';
+                                return context.formattedValue + '€';
                             }
                         },
                     },
@@ -34,19 +38,26 @@ abstract class AbstractBudgetPieChart extends ChartWidget
                 scales: {
                     x: {
                         ticks: {
-                            display: false,
+                            callback: function(value, index, values) {
+                                return value + '€';
+                            },
+                            callbacks: {
+                                label: function(context) {
+                                    return context.formattedValue + '€';
+                                }
+                            }
                         },
                     },
                     y: {
                         ticks: {
-                            display: false,
+                            display: true,
                         },
                     },
                 },
             }
         JS);
     }
-
+    
     protected function getChartLabels(array $data): void
     {
         $chartLabels = [];
@@ -86,5 +97,5 @@ abstract class AbstractBudgetPieChart extends ChartWidget
 
         return  $improvedMonthlyResults;
     }
-    
+
 }

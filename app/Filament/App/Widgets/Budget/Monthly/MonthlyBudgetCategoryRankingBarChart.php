@@ -2,88 +2,38 @@
 
 namespace App\Filament\App\Widgets\Budget\Monthly;
 
+use App\Filament\App\Widgets\Budget\AbstractBudgetRankingBarChart;
 use App\Repository\Bank\TransactionRepository;
 use Filament\Support\RawJs;
-use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Carbon;
 use App\Services\Bank\TransactionWidgetService;
 
-class MonthlyBudgetCategoryRankingBarChart extends ChartWidget
+class MonthlyBudgetCategoryRankingBarChart extends AbstractBudgetRankingBarChart
 {
     private const NUMBER_TO_KEEP = 10;
     protected static ?string $heading = 'Classement mensuel des dépenses par sous-catégorie';
     protected static ?string $pollingInterval = null;
-    private array $rawData = [];
-    private array $chartLabels = [];
-    private array $monthlyData = [];
-    private array $monthlyLabels = [];
-    private array $monthlyColors = [];
 
     protected function getData(): array
     {
-        $this->getMonthlySubCategoryRanking();
-        $this->setChartLabels();
+        $monthlyData = $this->getMonthlySpendings();
+        $this->getChartLabels($monthlyData);
         if ($this->filter === null) {
             $this->filter = end($this->chartLabels);
         }
         $activeFilter = $this->filter;
-        $this->getDataForMonth($activeFilter);
+        $chartData = $this->getChartData($monthlyData, $activeFilter);
     
         return [
             'datasets' => [
                 [
-                    'data' => $this->monthlyData,
-                    'backgroundColor' => $this->monthlyColors,
-                    'borderColor' => $this->monthlyColors,
+                    'data' => $chartData['data'],
+                    'backgroundColor' => $chartData['colors'],
+                    'borderColor' =>$chartData['colors'],
                 ],
             ],
-            'labels' => $this->monthlyLabels,
+            'labels' => $chartData['labels'],
         ];
-    }
-
-    protected function getType(): string
-    {
-        return 'bar';
-    }
-
-    protected function getOptions(): RawJs
-    {
-        return RawJs::make(<<<JS
-            {
-                indexAxis: 'y',
-                plugins: {
-                    legend: {
-                        display: false,
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return context.formattedValue + '€';
-                            }
-                        },
-                    },
-                },
-                scales: {
-                    x: {
-                        ticks: {
-                            callback: function(value, index, values) {
-                                return value + '€';
-                            },
-                            callbacks: {
-                                label: function(context) {
-                                    return context.formattedValue + '€';
-                                }
-                            }
-                        },
-                    },
-                    y: {
-                        ticks: {
-                            display: true,
-                        },
-                    },
-                },
-            }
-        JS);
     }
     
     protected function getFilters(): ?array
@@ -98,44 +48,22 @@ class MonthlyBudgetCategoryRankingBarChart extends ChartWidget
         return $filters;
     }
 
-    private function getMonthlySubCategoryRanking(): void
+    private function getChartData(array $data, ?string $filter): array
     {
-        $transactionRepository = new TransactionRepository();
-        $transactionService = new TransactionWidgetService();
-        $results = $transactionRepository->getMonthlySpendings(['Voyages', 'Virements internes']);
-        $improvedResults = $transactionService->addPeriodTotalAndPercentage($results);
-        array_pop($improvedResults);
-        $this->rawData = $improvedResults;
-    }
-
-    private function setChartLabels(): void
-    {
-        $data = $this->rawData;
-        $chartLabels = [];
-        foreach ($data as $key => $row) {
-            $chartLabels[] = $key;
-        }
-        $this->chartLabels = $chartLabels;
-    }
-
-    private function getDataForMonth(?string $month): void
-    {
-        $monthlyData = $monthlyLabels = [];
-        if (!is_null($month)) {
-            $monthlyRawData = $this->rawData[$month];
+        if (!is_null($filter)) {
+            $monthlyRawData = $data[$filter];
             usort($monthlyRawData['categories'], function ($a, $b) {
                 return $b['total'] <=> $a['total'];
             });
             $topCategories = array_slice($monthlyRawData['categories'], 0, self::NUMBER_TO_KEEP);
             foreach ($topCategories as $row) {
-                $monthlyData[] = $row['total'];
-                $monthlyLabels[] = $row['label'];
-                $monthlyColors[] = $row['color'];
+                $chartData['data'][] = $row['total'];
+                $chartData['labels'][] = $row['label'];
+                $chartData['colors'][] = $row['color'];
             }
         }
-        $this->monthlyData = $monthlyData;
-        $this->monthlyLabels = $monthlyLabels;
-        $this->monthlyColors = $monthlyColors;
+
+        return $chartData;
     }
 
 }
