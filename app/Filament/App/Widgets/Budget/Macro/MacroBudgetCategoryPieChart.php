@@ -4,7 +4,7 @@ namespace App\Filament\App\Widgets\Budget\Macro;
 
 use App\Filament\App\Widgets\Budget\AbstractBudgetPieChart;
 
-class MacroBudgetCategoryPieChart extends AbstractBudgetPieChart
+final class MacroBudgetCategoryPieChart extends AbstractBudgetPieChart
 {
     private const SUBCATEGORY_MINIMUM_THRESHOLD = 0.5;
     protected static ?string $heading = 'Part des dépenses totales par sous-catégorie (>=' . self::SUBCATEGORY_MINIMUM_THRESHOLD . '%)';

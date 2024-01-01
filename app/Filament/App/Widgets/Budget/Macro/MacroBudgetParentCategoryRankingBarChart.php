@@ -4,7 +4,7 @@ namespace App\Filament\App\Widgets\Budget\Macro;
 
 use App\Filament\App\Widgets\Budget\AbstractBudgetRankingBarChart;
 
-class MacroBudgetParentCategoryRankingBarChart extends AbstractBudgetRankingBarChart
+final class MacroBudgetParentCategoryRankingBarChart extends AbstractBudgetRankingBarChart
 {
     protected static ?string $heading = 'Classement des dépenses par catégorie (hors voyages)';
     protected static ?string $pollingInterval = null;

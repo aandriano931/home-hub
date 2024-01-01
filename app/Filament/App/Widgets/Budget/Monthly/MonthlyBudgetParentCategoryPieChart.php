@@ -5,7 +5,7 @@ namespace App\Filament\App\Widgets\Budget\Monthly;
 use App\Filament\App\Widgets\Budget\AbstractBudgetPieChart;
 use Illuminate\Support\Carbon;
 
-class MonthlyBudgetParentCategoryPieChart extends AbstractBudgetPieChart
+final class MonthlyBudgetParentCategoryPieChart extends AbstractBudgetPieChart
 {
     protected static ?string $heading = 'Dépenses mensuelles par catégorie';
     protected static ?string $pollingInterval = null;
@@ -46,9 +46,10 @@ class MonthlyBudgetParentCategoryPieChart extends AbstractBudgetPieChart
 
     private function getChartData(array $data, ?string $filter): array
     {
+        $chartData = [];
         if (!is_null($filter)) {
-            $monthlyRawData = $data[$filter];
-            foreach ($monthlyRawData['parent_categories'] as $label => $row) {
+            $rawData = $data[$filter];
+            foreach ($rawData['parent_categories'] as $label => $row) {
                 $chartData['data'][] = $row['percentage'];
                 $chartData['labels'][] = $label;
                 $chartData['colors'][] = $row['color'];

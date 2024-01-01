@@ -6,7 +6,7 @@ use App\Filament\App\Widgets\Budget\AbstractBudgetLineChart;
 use App\Repository\Bank\TransactionRepository;
 use App\Services\Bank\TransactionWidgetService;
 
-class MacroBudgetCategoryLineChart extends AbstractBudgetLineChart
+final class MacroBudgetCategoryLineChart extends AbstractBudgetLineChart
 {
     private const AVERAGE_SUBCATEGORY_SPENDING_COLOR = '#F60DEB';
     protected static ?string $heading = 'Dépenses par sous-catégorie et moyenne glissante sur ' . self::MOVING_AVERAGE_WINDOW . ' mois.';

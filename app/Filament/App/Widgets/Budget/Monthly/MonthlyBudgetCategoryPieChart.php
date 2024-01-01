@@ -5,7 +5,7 @@ namespace App\Filament\App\Widgets\Budget\Monthly;
 use App\Filament\App\Widgets\Budget\AbstractBudgetPieChart;
 use Illuminate\Support\Carbon;
 
-class MonthlyBudgetCategoryPieChart extends AbstractBudgetPieChart
+final class MonthlyBudgetCategoryPieChart extends AbstractBudgetPieChart
 {
     protected static ?string $heading = 'Dépenses mensuelles par sous-catégorie';
     protected static ?string $pollingInterval = null;
@@ -48,8 +48,8 @@ class MonthlyBudgetCategoryPieChart extends AbstractBudgetPieChart
     {
         $chartData = [];
         if (!is_null($filter)) {
-            $monthlyRawData = $data[$filter];
-            foreach ($monthlyRawData['categories'] as $row) {
+            $rawData = $data[$filter];
+            foreach ($rawData['categories'] as $row) {
                 $chartData['data'][] = $row['percentage'];
                 $chartData['labels'][] = $row['label'];
                 $chartData['colors'][] = $row['color'];

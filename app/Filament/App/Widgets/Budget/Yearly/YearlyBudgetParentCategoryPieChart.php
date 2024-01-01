@@ -5,7 +5,7 @@ namespace App\Filament\App\Widgets\Budget\Yearly;
 use App\Filament\App\Widgets\Budget\AbstractBudgetPieChart;
 use Illuminate\Support\Carbon;
 
-class YearlyBudgetParentCategoryPieChart extends AbstractBudgetPieChart
+final class YearlyBudgetParentCategoryPieChart extends AbstractBudgetPieChart
 {
     protected static ?string $heading = 'Dépenses annuelles par catégorie';
     protected static ?string $pollingInterval = null;
@@ -48,8 +48,8 @@ class YearlyBudgetParentCategoryPieChart extends AbstractBudgetPieChart
     {
         $chartData = [];
         if (!is_null($year)) {
-            $yearlyRawData = $data[$year];
-            foreach ($yearlyRawData['parent_categories'] as $label => $row) {
+            $rawData = $data[$year];
+            foreach ($rawData['parent_categories'] as $label => $row) {
                 $chartData['data'][] = $row['percentage'];
                 $chartData['labels'][] = $label;
                 $chartData['colors'][] = $row['color'];

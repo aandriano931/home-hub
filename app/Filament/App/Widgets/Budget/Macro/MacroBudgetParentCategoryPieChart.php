@@ -4,7 +4,7 @@ namespace App\Filament\App\Widgets\Budget\Macro;
 
 use App\Filament\App\Widgets\Budget\AbstractBudgetPieChart;
 
-class MacroBudgetParentCategoryPieChart extends AbstractBudgetPieChart
+final class MacroBudgetParentCategoryPieChart extends AbstractBudgetPieChart
 {
     protected static ?string $heading = 'Part des dépenses totales par catégorie';
     protected static ?string $pollingInterval = null;

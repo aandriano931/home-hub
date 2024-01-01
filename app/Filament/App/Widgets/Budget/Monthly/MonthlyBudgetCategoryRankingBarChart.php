@@ -3,12 +3,9 @@
 namespace App\Filament\App\Widgets\Budget\Monthly;
 
 use App\Filament\App\Widgets\Budget\AbstractBudgetRankingBarChart;
-use App\Repository\Bank\TransactionRepository;
-use Filament\Support\RawJs;
 use Illuminate\Support\Carbon;
-use App\Services\Bank\TransactionWidgetService;
 
-class MonthlyBudgetCategoryRankingBarChart extends AbstractBudgetRankingBarChart
+final class MonthlyBudgetCategoryRankingBarChart extends AbstractBudgetRankingBarChart
 {
     private const NUMBER_TO_KEEP = 10;
     protected static ?string $heading = 'Classement mensuel des dépenses par sous-catégorie';
@@ -29,7 +26,7 @@ class MonthlyBudgetCategoryRankingBarChart extends AbstractBudgetRankingBarChart
                 [
                     'data' => $chartData['data'],
                     'backgroundColor' => $chartData['colors'],
-                    'borderColor' =>$chartData['colors'],
+                    'borderColor' => $chartData['colors'],
                 ],
             ],
             'labels' => $chartData['labels'],
@@ -50,12 +47,13 @@ class MonthlyBudgetCategoryRankingBarChart extends AbstractBudgetRankingBarChart
 
     private function getChartData(array $data, ?string $filter): array
     {
+        $chartData = [];
         if (!is_null($filter)) {
-            $monthlyRawData = $data[$filter];
-            usort($monthlyRawData['categories'], function ($a, $b) {
+            $rawData = $data[$filter];
+            usort($rawData['categories'], function ($a, $b) {
                 return $b['total'] <=> $a['total'];
             });
-            $topCategories = array_slice($monthlyRawData['categories'], 0, self::NUMBER_TO_KEEP);
+            $topCategories = array_slice($rawData['categories'], 0, self::NUMBER_TO_KEEP);
             foreach ($topCategories as $row) {
                 $chartData['data'][] = $row['total'];
                 $chartData['labels'][] = $row['label'];
