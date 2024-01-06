@@ -1,0 +1,87 @@
+version: '3.8'
+name: home-hub
+services:
+  
+  #PHP
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: app
+    restart: unless-stopped
+    tty: true
+    ports:
+      - '5173:5173'
+    environment:
+      SERVICE_NAME: app
+      SERVICE_TAGS: dev
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    networks:
+      - net
+
+  #Nginx
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "8989:80"
+      - "446:443"
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx/:/etc/nginx/conf.d/
+      - /etc/ionos/aandriano-certificate.cer:/etc/nginx/ssl/fullchain.pem
+      - /etc/ionos/aandriano-privatekey.key:/etc/nginx/ssl/privkey.pem
+    networks:
+      - net
+
+  #MySQL
+  mysql:
+    image: mysql:8.2.0
+    container_name: mysql
+    restart: unless-stopped
+    tty: true
+    ports:
+      - ${DB_FORWARD_PORT}:3306
+    environment:
+      MYSQL_DATABASE: home-hub
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      TZ: 'Europe/Paris'
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+    volumes:
+      - dbdata:/var/lib/mysql/
+      - ./docker/mysql/my.cnf:/etc/mysql/my.cnf
+    networks:
+      - net
+
+  # phpmyadmin GUI for mysql     
+  phpmyadmin:
+    image: phpmyadmin:5.2.1
+    restart: always
+    container_name: phpmyadmin
+    ports:
+      - 8090:80
+    environment:
+      PMA_HOST: mysql
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    depends_on:
+      - mysql
+    networks:
+      - net
+
+#Networks
+networks:
+  net:
+    driver: bridge
+
+#Volumes
+volumes:
+  dbdata:
+    driver: local
