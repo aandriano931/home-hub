@@ -10,7 +10,6 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class BankParentCategoryResource extends Resource
@@ -20,7 +19,6 @@ class BankParentCategoryResource extends Resource
     protected static ?string $navigationGroup = 'Budget';
     protected static ?string $model = ParentCategory::class;
     protected static ?string $label = 'Catégorie parent';
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function form(Form $form): Form
     {

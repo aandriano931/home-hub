@@ -46,6 +46,13 @@ class User extends Authenticatable implements FilamentUser
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return str_ends_with($this->email, env('ALLOWED_MAIL_DOMAIN')) && $this->hasVerifiedEmail();
+        if ($panel->getId() === 'admin') {
+            return in_array($this->email, explode(',', env('ALLOWED_ADMINS_LIST'))) && $this->hasVerifiedEmail();
+        }
+        if ($panel->getId() === 'app') {
+            return in_array($this->email, explode(',', env('ALLOWED_USERS_LIST'))) && $this->hasVerifiedEmail();
+        }
+ 
+        return false;
     }
 }

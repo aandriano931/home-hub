@@ -24,11 +24,13 @@ class AppPanelProvider extends PanelProvider
     public function panel(Panel $panel): Panel
     {
         return $panel
+            ->default()
+            ->login()
             ->id('app')
             ->path('')
             ->topNavigation()
             ->colors([
-                'primary' => Color::Blue,
+                'primary' => Color::Amber,
             ])
             ->navigationGroups([
                 NavigationGroup::make()
