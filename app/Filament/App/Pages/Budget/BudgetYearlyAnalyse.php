@@ -14,7 +14,7 @@ class BudgetYearlyAnalyse extends Page
     protected static string $view = 'filament.app.pages.budget-yearly-analyse';
     protected static ?string $navigationGroup = 'Budget';
     protected static ?string $navigationLabel = 'Analyse annuelle';
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 3;
     protected static ?string $title = 'Analyse annuelle du budget';
     protected ?string $subheading = 'Analyse des dépenses annuelles sur le compte joint depuis 2020';
 

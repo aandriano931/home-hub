@@ -2,11 +2,10 @@
 Projet d'appli web de gestion du quotidien...
 
 En cours:
-* Analyse du budget et découpage en pages distinctes
+* Configurateur de budget en fonction des postes de dépense fixes
 
 A venir: 
 * Analyse de la consommation électrique
-* Configurateur de budget en fonction des postes de dépense fixes
 * Regroupement des agendas ? Agenda famille
 * Ludothèque
 * Bilbiothèque

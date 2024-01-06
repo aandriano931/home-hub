@@ -16,7 +16,7 @@ class BudgetMacroAnalyse extends Page
     protected static string $view = 'filament.app.pages.budget-macro-analyse';
     protected static ?string $navigationGroup = 'Budget';
     protected static ?string $navigationLabel = 'Analyse macro';
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 4;
     protected static ?string $title = 'Analyse macro du budget';
     protected ?string $subheading = 'Analyse de l\'ensemble des dépenses sur le compte joint depuis janvier 2020';
 
