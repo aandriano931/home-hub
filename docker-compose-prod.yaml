@@ -30,10 +30,10 @@ services:
     tty: true
     ports:
       - "8989:80"
-      - "446:443"
+      - "443:443"
     volumes:
       - ./:/var/www
-      - ./docker/nginx/:/etc/nginx/conf.d/
+      - ./docker/nginx/prod/:/etc/nginx/conf.d/
       - /etc/ionos/aandriano-certificate.cer:/etc/nginx/ssl/fullchain.pem
       - /etc/ionos/aandriano-privatekey.key:/etc/nginx/ssl/privkey.pem
     networks:

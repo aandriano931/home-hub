@@ -30,10 +30,10 @@ services:
     tty: true
     ports:
       - "8989:80"
-      - "446:443"
+      - "443:443"
     volumes:
       - ./:/var/www
-      - ./docker/nginx/:/etc/nginx/conf.d/
+      - ./docker/nginx/dev/:/etc/nginx/conf.d/
     networks:
       - net
 
