@@ -65,6 +65,7 @@ class MacroBudgetGlobalLineChart extends AbstractBudgetLineChart
         $transactionService = new TransactionWidgetService();
         $spendings = $transactionRepository->getMonthlySpendings(['Virements internes']);
         $improvedSpendings = $transactionService->addPeriodTotalAndPercentage($spendings);
+        array_pop($improvedSpendings);
         foreach ($improvedSpendings as $label => $period) {
             $chartLabels[] = $label;
             $spendingsData[] = $period['cumulated_total'];

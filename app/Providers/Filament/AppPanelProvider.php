@@ -2,7 +2,6 @@
 
 namespace App\Providers\Filament;
 
-use Filament\Facades\Filament;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -25,7 +24,6 @@ class AppPanelProvider extends PanelProvider
     {
         return $panel
             ->default()
-            ->login()
             ->id('app')
             ->path('')
             ->topNavigation()
@@ -35,7 +33,7 @@ class AppPanelProvider extends PanelProvider
             ->navigationGroups([
                 NavigationGroup::make()
                     ->label('Budget')
-                    ->icon('heroicon-s-currency-euro')
+                    ->icon('heroicon-s-banknotes')
                     ->collapsed(),
             ])
             ->discoverResources(in: app_path('Filament/App/Resources'), for: 'App\\Filament\\App\\Resources')

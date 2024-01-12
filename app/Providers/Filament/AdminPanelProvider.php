@@ -32,6 +32,10 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->navigationGroups([
                 NavigationGroup::make()
+                    ->label('Banque')
+                    ->icon('heroicon-s-banknotes')
+                    ->collapsed(),
+                NavigationGroup::make()
                     ->label('Budget')
                     ->icon('heroicon-s-currency-euro')
                     ->collapsed(),

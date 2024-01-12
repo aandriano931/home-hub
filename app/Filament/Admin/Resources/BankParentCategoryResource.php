@@ -16,7 +16,7 @@ class BankParentCategoryResource extends Resource
 {
     public const CREDIT_TYPE = 'crédit';
     public const DEBIT_TYPE = 'débit';
-    protected static ?string $navigationGroup = 'Budget';
+    protected static ?string $navigationGroup = 'Banque';
     protected static ?string $model = ParentCategory::class;
     protected static ?string $label = 'Catégorie parent';
 

@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Models\Bank;
+namespace App\Models\Budget;
 
-use App\Models\Budget\BudgetLine;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Category extends Model
+class BudgetContributor extends Model
 {
     use HasFactory, HasUuids;
 
@@ -18,21 +18,30 @@ class Category extends Model
      *
      * @var string
      */
-    protected $table = 'bank_category';
+    protected $table = 'budget_contributor';
 
     /**
-     * Get the category that owns the transaction.
+     * Get the budget that owns the budget contributor.
      */
-    public function parentCategory(): BelongsTo
+    public function budget(): BelongsTo
     {
-        return $this->belongsTo(ParentCategory::class, 'bank_parent_category_id');
+        return $this->belongsTo(Budget::class, 'budget_id');
     }
 
     /**
-     * Get the Budget Lines for the category.
+     * Get the user that owns the budget contributor.
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /**
+     * Get the budget lines for the contributor.
      */
     public function budgetLines(): HasMany
     {
         return $this->hasMany(BudgetLine::class);
     }
+
 }
