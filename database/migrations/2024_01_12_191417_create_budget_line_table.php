@@ -20,7 +20,6 @@ return new class extends Migration
             $table->decimal('credit', 10, 2);
             $table->foreignUuid('budget_id')->constrained('budget')->nullable(false);
             $table->foreignUuid('bank_category_id')->constrained('bank_category')->nullable(true);
-            $table->foreignUuid('budget_contributor_id')->constrained('budget_contributor')->nullable(true);
         });
     }
 

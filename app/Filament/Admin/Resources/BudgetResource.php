@@ -31,6 +31,10 @@ class BudgetResource extends Resource
                     ->default(now()->addMonths(3))
                     ->minDate(now())
                     ->maxDate(now()->addMonths(6)),
+                Forms\Components\Toggle::make('is_active')
+                    ->label('Actif')
+                    ->required()
+                    ->default(false),
             ]);
     }
 
@@ -43,6 +47,8 @@ class BudgetResource extends Resource
                 Tables\Columns\TextColumn::make('expiration_date')
                     ->dateTime('d/m/Y')
                     ->label('Date d\'expiration'),
+                Tables\Columns\ToggleColumn::make('is_active')
+                    ->label('Actif'),
             ])
             ->filters([
                 //

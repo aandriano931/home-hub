@@ -34,13 +34,4 @@ class BudgetLine extends Model
     {
         return $this->belongsTo(Category::class, 'bank_category_id');
     }
-
-    /**
-     * Get the contributor that owns the budget line.
-     */
-    public function contributor(): BelongsTo
-    {
-        return $this->belongsTo(BudgetContributor::class, 'budget_contributor_id');
-    }
-
 }

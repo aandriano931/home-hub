@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 
 class TransactionRepository
 {
-    private const DEFAULT_START_DATE = '2020-01-01';
+    public const DEFAULT_START_DATE = '2020-01-01';
     private string $table = "bank_transaction";
 
     /**

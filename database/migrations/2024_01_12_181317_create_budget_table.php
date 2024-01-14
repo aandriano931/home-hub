@@ -17,6 +17,7 @@ return new class extends Migration
             $table->dateTime('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->dateTime('updated_at')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->string('label', 100);
+            $table->boolean('is_active')->default(false);
         });
     }
 

@@ -42,15 +42,10 @@ class BudgetLineResource extends Resource
                 ->label('Budget')
                 ->required(),
             Forms\Components\Select::make('bank_category_id')
-                ->relationship('category', 'category.name')
+                ->relationship('category', 'bank_category.name')
                 ->searchable()
                 ->preload()
                 ->label('Catégorie'),
-            Forms\Components\Select::make('budget_contributor_id')
-                ->relationship('contributor', 'contributor.label')
-                ->searchable()
-                ->preload()
-                ->label('Contributeur'),
             ]);
     }
 
@@ -75,8 +70,6 @@ class BudgetLineResource extends Resource
                 ->money('eur'),
             Tables\Columns\TextColumn::make('budget.label')
                 ->label('Budget'),
-            Tables\Columns\TextColumn::make('contributor.label')
-                ->label('Contributeur'),
         ])
         ->filters([
             //

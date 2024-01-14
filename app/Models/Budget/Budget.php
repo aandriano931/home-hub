@@ -25,5 +25,13 @@ class Budget extends Model
     {
         return $this->hasMany(BudgetLine::class);
     }
+
+    /**
+     * Get the contributors for the budget.
+     */
+    public function contributors(): HasMany
+    {
+        return $this->hasMany(BudgetContributor::class);
+    }
     
 }
