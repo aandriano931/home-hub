@@ -1,5 +1,5 @@
 <x-filament-panels::page>
-    <ul> 
+    <ul>
         <li><strong>Nom du budget :</strong> {{$budget->label}}</li>
         <li><strong>Date d'expiration :</strong> {{ \Carbon\Carbon::parse($budget->expiration_date)->format('d/m/Y') }}</li>
         <li><strong>Total crédit :</strong> {{$totalCredit}} €</li>
