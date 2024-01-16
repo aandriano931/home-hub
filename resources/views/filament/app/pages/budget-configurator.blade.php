@@ -8,4 +8,7 @@
     </ul>
     @livewire('list-budget-lines', ['budget' => $budget])
     @livewire('list-budget-contributors', ['budget' => $budget, 'totalCredit' => $totalCredit, 'totalDebit' => $totalDebit])
+    <button wire:click="sendNotification({{$budget}})">
+        EMAIL
+    </button>
 </x-filament-panels::page>

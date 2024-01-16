@@ -3,8 +3,9 @@
 namespace App\Filament\App\Pages\Budget;
 
 use App\Models\Budget\Budget;
-use App\Models\Budget\BudgetLine;
+use App\Notifications\BudgetReadyNotification;
 use Filament\Pages\Page;
+
 
 class BudgetConfigurator extends Page
 {
@@ -13,7 +14,7 @@ class BudgetConfigurator extends Page
     protected static ?string $navigationLabel = 'Budget mensuel en cours';
     protected static ?int $navigationSort = 1;
     protected static ?string $title = 'Budget mensuel en cours';
-    protected ?string $subheading = 'Informations sur le budget mensuel actuel et sur la méthode de calcul des parts utilisée.';
+    protected ?string $subheading = 'Informations sur le budget mensuel actuel.';
     public Budget $budget;
     public float $totalDebit;
     public float $totalCredit;
@@ -24,6 +25,16 @@ class BudgetConfigurator extends Page
         $this->budget = $budget;
         $this->totalCredit =$this->getBudgetTotalCredit($budget);
         $this->totalDebit =$this->getBudgetTotalDebit($budget);
+    }
+
+    public function sendNotification()
+    {
+        $notification = new BudgetReadyNotification($this->budget);
+        foreach($this->budget->contributors as $contributor) {
+            if($contributor->name === 'Arnaud') {
+                $contributor->user->notify($notification);
+            }
+        }
     }
 
     private function getBudgetTotalDebit(Budget $budget): float

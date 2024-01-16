@@ -7,7 +7,7 @@ use Filament\Widgets\ChartWidget;
 
 abstract class AbstractBudgetLineChart extends ChartWidget
 {
-    protected const MOVING_AVERAGE_WINDOW = 12;
+    protected const MOVING_AVERAGE_WINDOW = 6;
     protected int | string | array $columnSpan = 'full';
 
     protected function getType(): string
