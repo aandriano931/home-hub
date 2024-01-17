@@ -8,7 +8,9 @@
     </ul>
     @livewire('list-budget-lines', ['budget' => $budget])
     @livewire('list-budget-contributors', ['budget' => $budget, 'totalCredit' => $totalCredit, 'totalDebit' => $totalDebit])
-    <x-filament::button icon="heroicon-m-paper-airplane" wire:click="sendNotification({{$budget}})">
-        Envoyer un email aux participants
-    </x-filament::button>
+    <section class="mx-auto">
+        <x-filament::button icon="heroicon-m-paper-airplane" wire:click="sendNotification({{$budget}})">
+            Envoyer un email aux participants
+        </x-filament::button>
+    </section>
 </x-filament-panels::page>

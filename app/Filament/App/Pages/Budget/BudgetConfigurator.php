@@ -4,6 +4,8 @@ namespace App\Filament\App\Pages\Budget;
 
 use App\Models\Budget\Budget;
 use App\Notifications\BudgetReadyNotification;
+use Exception;
+use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 
 
@@ -29,11 +31,21 @@ class BudgetConfigurator extends Page
 
     public function sendNotification()
     {
-        $notification = new BudgetReadyNotification($this->budget);
-        foreach($this->budget->contributors as $contributor) {
-            if($contributor->name === 'Arnaud') {
+        try {
+            $notification = new BudgetReadyNotification($this->budget);
+            foreach($this->budget->contributors as $contributor) {
                 $contributor->user->notify($notification);
             }
+            Notification::make()
+            ->title('Emails envoyés avec succès.')
+            ->success()
+            ->send();
+        } catch (Exception $ex) {
+            Notification::make()
+            ->title('Echec de l\'envoi des emails.')
+            ->danger()
+            ->send();
+            \Log::error($ex->getMessage());
         }
     }
 
