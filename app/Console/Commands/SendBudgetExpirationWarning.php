@@ -36,7 +36,6 @@ class SendBudgetExpirationWarning extends Command
             foreach ($activeBudget->contributors as $contributor) {
                 if($contributor->label === 'Arnaud') {
                     $notification = new ActiveBudgetExpirationWarningNotification($activeBudget);
-                    dd($notification->toMail($contributor->user));
                     $contributor->user->notify($notification);
                 }
             }
