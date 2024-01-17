@@ -46,7 +46,7 @@ class ActiveBudgetExpirationWarningNotification extends Notification
             ->subject("(FamilyHub) Le budget : {$this->budget->label} va expirer")
             ->greeting('Coucou!')
             ->line("Le budget mensuel actif arrivera à expiration le {$this->formatedExpirationDate}!")
-            ->action('Créer ou modifier un budget:', url('/admin/budgets'))
+            ->action('Créer ou modifier le budget', url('/admin/budgets'))
             ->line('Bonne journée,')
             ->salutation('Nonobot.');
 

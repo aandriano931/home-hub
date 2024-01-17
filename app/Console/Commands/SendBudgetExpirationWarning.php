@@ -2,7 +2,6 @@
  
 namespace App\Console\Commands;
  
-use App\Mail\ActiveBudgetExpirationWarning;
 use App\Models\Budget\Budget;
 use App\Notifications\ActiveBudgetExpirationWarningNotification;
 use Illuminate\Console\Command;
@@ -32,14 +31,11 @@ class SendBudgetExpirationWarning extends Command
         $gapInDays = Carbon::now()->diffInDays($expiration_date);
 
         //If the expiration date - actual date = warning delay send an email to participants
-        // if($gapInDays === self::WARNING_DELAY) {
+        if($gapInDays === self::WARNING_DELAY) {
             foreach ($activeBudget->contributors as $contributor) {
-                if($contributor->label === 'Arnaud') {
-                    $notification = new ActiveBudgetExpirationWarningNotification($activeBudget);
-                    $contributor->user->notify($notification);
-                }
+                $notification = new ActiveBudgetExpirationWarningNotification($activeBudget);
+                $contributor->user->notify($notification);
             }
-        // }
-
+        }
     }
 }
