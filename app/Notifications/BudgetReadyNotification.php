@@ -40,15 +40,16 @@ class BudgetReadyNotification extends Notification
     {
         $message = new MailMessage();
         $message
-            ->subject('Les virements à mettre en place pour le budget mensuel')
+            ->subject('(FamilyHub) Virements mensuels (rappel)')
             ->greeting('Coucou!')
-            ->line('Les virements mensuels à mettre place sont: ');
+            ->line("Les virements mensuels à mettre place pour le budget {{$this->budget->label}} sont: ");
         foreach($this->budget->contributors as $contributor) {
-            $message->line("{$contributor->name} : {$this->calculatePart($contributor)} €");
+            $message->line($contributor->label . " : {$this->calculatePart($contributor)} €");
         }
         $message
-            ->action('Consulter le budget en cours', url('/budget-configurator'))
-            ->line('Bonne journée!');
+            ->action('Consulter les détails du budget', url('/budget-configurator'))
+            ->line('Bonne journée,')
+            ->salutation('Nonobot.');
 
         return $message;
     }
