@@ -40,9 +40,9 @@ class BudgetReadyNotification extends Notification
     {
         $message = new MailMessage();
         $message
-            ->subject('(FamilyHub) Virements mensuels (rappel)')
+            ->subject('(FamilyHub) Virements budget mensuel')
             ->greeting('Coucou!')
-            ->line("Les virements mensuels à mettre place pour le budget {{$this->budget->label}} sont: ");
+            ->line("Les virements à mettre place pour le budget mensuel <b>{$this->budget->label}</b> sont: ");
         foreach($this->budget->contributors as $contributor) {
             $message->line($contributor->label . " : {$this->calculatePart($contributor)} €");
         }
@@ -102,6 +102,6 @@ class BudgetReadyNotification extends Notification
         $totalCredit = $this->getBudgetTotalCredit($this->budget);
         $totalDebit = $this->getBudgetTotalDebit($this->budget);
 
-        return round($ratio * ($totalDebit - $totalCredit));
+        return round($ratio * ($totalDebit - $totalCredit), -1);
     }
 }

@@ -33,7 +33,7 @@ class ListBudgetContributors extends Component implements HasForms, HasTable
         return $table
             ->query(BudgetContributor::query()->where('budget_id', '=', $this->budget->id))
             ->heading('Participant(s) et parts à payer.')
-            ->description('La méthode de calcul utilisée pour déterminer la part est la suivante: ratio (somme disponible de la personne / total disponible) multiplié par le total du budget et arrondi à l\'entier supérieur.')
+            ->description('La méthode de calcul utilisée pour déterminer la part est la suivante: ratio (somme disponible de la personne / total disponible) multiplié par le total du budget et arrondi à la dizaine la plus proche.')
             ->columns([
                 Tables\Columns\TextColumn::make('label')
                     ->label('Nom'),
@@ -83,7 +83,7 @@ class ListBudgetContributors extends Component implements HasForms, HasTable
 
     public function calculatePart(BudgetContributor $budgetContributor): float
     {
-        return round($this->calculateRatio($budgetContributor) * ($this->totalDebit - $this->totalCredit));
+        return round($this->calculateRatio($budgetContributor) * ($this->totalDebit - $this->totalCredit), -1);
     }
 
     public function render()
