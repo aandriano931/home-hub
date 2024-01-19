@@ -56,6 +56,7 @@ services:
     volumes:
       - dbdata:/var/lib/mysql/
       - ./docker/mysql/my.cnf:/etc/mysql/my.cnf
+      - ./backup/familyhub:/backup/familyhub
     networks:
       - net
 

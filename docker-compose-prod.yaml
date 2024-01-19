@@ -58,6 +58,7 @@ services:
     volumes:
       - dbdata:/var/lib/mysql/
       - ./docker/mysql/my.cnf:/etc/mysql/my.cnf
+      - /home/arnaud/dev/backup:/backup/familyhub
     networks:
       - net
 
