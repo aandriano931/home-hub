@@ -17,7 +17,6 @@ services:
       SERVICE_TAGS: dev
       VIRTUAL_HOST: ${APP_DOMAIN}
       LETSENCRYPT_HOST: ${APP_DOMAIN}
-      VIRTUAL_PORT: 9000
       VIRTUAL_ROOT: /var/www/public
     volumes:
       - ./:/var/www
