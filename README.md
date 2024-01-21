@@ -5,6 +5,7 @@
 Projet d'appli web généraliste de gestion du quotidien et d'expérimentations en développement web.
 
 ### Fonctionnalités:
+#### Métier
 * Espace d'administration pour la création des données bancaires (transactions, catégories, comptes etc.)
 * Pages d'analyses macro/annuelle/mensuelle des dépenses du foyer avec widgets graphiques
 * Espace d'administration pour la création des données du budget (budgets, lignes de budget, participants etc.)
@@ -13,15 +14,19 @@ Projet d'appli web généraliste de gestion du quotidien et d'expérimentations 
 * Bouton d'envoi par email des parts du budget pour chaque participant
 * Commande pour envoyer un email lorsque le budget actif approche de sa date d'expiration
 
+#### Technique
+* Dockerisaton de l'environnement
+* Sauvegarde quotidienne automatique de la base de données
+
 ### En cours de développement:
-* Build et déploiement automatique via Github Actions
-* Sauvegarde automatique de la base de données
+* Mise en place des certificats SSL
 
 ### A venir: 
 * Analyse de la consommation électrique
+* Build et déploiement automatique via Github Actions
 * Regroupement des agendas ? Agenda famille
 * Ludothèque
-* Bilbiothèque
+* Bibliothèque
 * Recettes de cuisine
 
 ## Cronjobs nécessaires
