@@ -30,7 +30,7 @@ services:
     environment:
       VIRTUAL_HOST: ${APP_DOMAIN}
       LETSENCRYPT_HOST: ${APP_DOMAIN}
-      VIRTUAL_ROOT: /var/www/html
+      VIRTUAL_ROOT: /usr/share/nginx/html
     ports:
       - "80:80"
       - "443:443"
