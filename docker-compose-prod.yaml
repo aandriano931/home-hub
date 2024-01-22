@@ -30,22 +30,23 @@ services:
     environment:
       VIRTUAL_HOST: ${APP_DOMAIN}
       LETSENCRYPT_HOST: ${APP_DOMAIN}
-      VIRTUAL_ROOT: /var/www/public
+      VIRTUAL_ROOT: /var/www/html
     ports:
-      - "8989:80"
-      - "444:443"
+      - "80:80"
+      - "443:443"
     volumes:
       - ./:/var/www
       - conf:/etc/nginx/conf.d
       - vhost:/etc/nginx/vhost.d
       - html:/usr/share/nginx/html
-      - certs:/etc/nginx/certs
+      - certs:/etc/nginx/certs:ro
       - ./docker/nginx/location_override.conf:/etc/nginx/vhost.d/${APP_DOMAIN}_location_override
       - ./docker/nginx/default.conf:/etc/nginx/vhost.d/${APP_DOMAIN}
     labels:
     - "com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy=true"
     networks:
       - net
+      - reverse-proxy
 
   dockergen:
     image: nginxproxy/docker-gen:0.11
@@ -58,34 +59,33 @@ services:
       - conf:/etc/nginx/conf.d
       - vhost:/etc/nginx/vhost.d
       - html:/usr/share/nginx/html
-      - certs:/etc/nginx/certs
+      - certs:/etc/nginx/certs:ro
       - /var/run/docker.sock:/tmp/docker.sock:ro
       - ./docker/nginx/nginx.tmpl:/etc/docker-gen/templates/nginx.tmpl
     networks:
-      - net
+      - reverse-proxy
 
-  letsencrypt:
-    image: nginxproxy/acme-companion:2.2
-    container_name: letsencrypt
-    restart: unless-stopped
-    depends_on:
-      - nginx
-      - dockergen
-    environment:
-      DEFAULT_EMAIL: ${DEFAULT_EMAIL}
-      # Staging API, remove it after testing
-      ACME_CA_URI: "https://acme-staging-v02.api.letsencrypt.org/directory"
-      NGINX_PROXY_CONTAINER: nginx
-      NGINX_DOCKER_GEN_CONTAINER: nginx-proxy-gen
-    volumes:
-      - conf:/etc/nginx/conf.d
-      - vhost:/etc/nginx/vhost.d
-      - html:/usr/share/nginx/html
-      - certs:/etc/nginx/certs:rw
-      - acme:/etc/acme.sh
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-    networks:
-      - net
+  # letsencrypt:
+  #   image: nginxproxy/acme-companion:2.2
+  #   container_name: letsencrypt
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - nginx
+  #     - dockergen
+  #   environment:
+  #     DEFAULT_EMAIL: ${DEFAULT_EMAIL}
+  #     # Staging API, remove it after testing
+  #     ACME_CA_URI: "https://acme-staging-v02.api.letsencrypt.org/directory"
+  #     NGINX_PROXY_CONTAINER: nginx
+  #     NGINX_DOCKER_GEN_CONTAINER: nginx-proxy-gen
+  #   volumes:
+  #     - conf:/etc/nginx/conf.d
+  #     - vhost:/etc/nginx/vhost.d
+  #     - certs:/etc/nginx/certs:rw
+  #     - acme:/etc/acme.sh
+  #     - /var/run/docker.sock:/var/run/docker.sock:ro
+  #   networks:
+  #     - net
 
   #MySQL
   mysql:
@@ -129,6 +129,8 @@ services:
 networks:
   net:
     driver: bridge
+  reverse-proxy:
+    external: true
 
 #Volumes
 volumes:
