@@ -12,12 +12,10 @@ services:
     tty: true
     ports:
       - '5173:5173'
+      - '9000:9000'
     environment:
       SERVICE_NAME: app
       SERVICE_TAGS: dev
-      VIRTUAL_HOST: ${APP_DOMAIN}
-      LETSENCRYPT_HOST: ${APP_DOMAIN}
-      VIRTUAL_ROOT: /var/www/public
     volumes:
       - ./:/var/www
       - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
@@ -29,7 +27,10 @@ services:
     image: nginx:1-alpine
     container_name: nginx
     restart: unless-stopped
-    tty: true
+    environment:
+      VIRTUAL_HOST: ${APP_DOMAIN}
+      LETSENCRYPT_HOST: ${APP_DOMAIN}
+      VIRTUAL_ROOT: /var/www/public
     ports:
       - "8989:80"
       - "444:443"
