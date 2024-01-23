@@ -10,27 +10,28 @@ services:
     container_name: app
     restart: unless-stopped
     tty: true
-    ports:
-      - '5173:5173'
-      - '9000:9000'
+    expose:
+      - '5173'
     environment:
       SERVICE_NAME: app
       SERVICE_TAGS: dev
+      VIRTUAL_HOST: ${APP_DOMAIN}
+      VIRTUAL_PORT: 9000
+      LETSENCRYPT_HOST: ${APP_DOMAIN}
+      VIRTUAL_ROOT: /usr/share/nginx/html
     volumes:
       - ./:/var/www
+
       - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
     networks:
       - net
+      - reverse-proxy
 
   #Nginx
   nginx:
     image: nginx:1-alpine
     container_name: nginx
     restart: unless-stopped
-    environment:
-      VIRTUAL_HOST: ${APP_DOMAIN}
-      LETSENCRYPT_HOST: ${APP_DOMAIN}
-      VIRTUAL_ROOT: /usr/share/nginx/html
     ports:
       - "80:80"
       - "443:443"
@@ -75,7 +76,7 @@ services:
     environment:
       DEFAULT_EMAIL: ${DEFAULT_EMAIL}
       # Staging API, remove it after testing
-      #ACME_CA_URI: "https://acme-staging-v02.api.letsencrypt.org/directory"
+      ACME_CA_URI: "https://acme-staging-v02.api.letsencrypt.org/directory"
       NGINX_PROXY_CONTAINER: nginx
       NGINX_DOCKER_GEN_CONTAINER: nginx-proxy-gen
     volumes:
