@@ -135,8 +135,8 @@ services:
 networks:
   net:
     driver: bridge
-reverse-proxy:
-    external: true
+  reverse-proxy:
+      external: true
 
 #Volumes
 volumes:
