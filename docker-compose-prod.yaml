@@ -24,6 +24,7 @@ services:
       - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
     networks:
       - net
+      - reverse-proxy
 
   #Nginx
   nginx:
@@ -47,6 +48,7 @@ services:
     - "com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy=true"
     networks:
       - net
+      - reverse-proxy
 
   dockergen:
     image: nginxproxy/docker-gen:0.11
@@ -63,7 +65,7 @@ services:
       - /var/run/docker.sock:/tmp/docker.sock:ro
       - ./docker/nginx/nginx.tmpl:/etc/docker-gen/templates/nginx.tmpl
     networks:
-      - net
+      - reverse-proxy
 
   letsencrypt:
     image: nginxproxy/acme-companion:2.2
@@ -127,11 +129,14 @@ services:
       - mysql
     networks:
       - net
+      - reverse-proxy
 
 #Networks
 networks:
   net:
     driver: bridge
+reverse-proxy:
+    external: true
 
 #Volumes
 volumes:
