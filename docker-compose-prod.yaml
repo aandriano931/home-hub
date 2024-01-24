@@ -21,11 +21,9 @@ services:
       VIRTUAL_ROOT: /usr/share/nginx/html
     volumes:
       - ./:/var/www
-
       - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
     networks:
       - net
-      - reverse-proxy
 
   #Nginx
   nginx:
@@ -43,11 +41,12 @@ services:
       - certs:/etc/nginx/certs:ro
       - ./docker/nginx/location_override.conf:/etc/nginx/vhost.d/${APP_DOMAIN}_location_override
       - ./docker/nginx/default.conf:/etc/nginx/vhost.d/${APP_DOMAIN}
+      - ./docker/nginx/phpmyadmin/default.conf:/etc/nginx/vhost.d/${PHPMYADMIN_DOMAIN}
+      - ./docker/nginx/phpmyadmin/location_override.conf:/etc/nginx/vhost.d/${PHPMYADMIN_DOMAIN}_location_override
     labels:
     - "com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy=true"
     networks:
       - net
-      - reverse-proxy
 
   dockergen:
     image: nginxproxy/docker-gen:0.11
@@ -64,7 +63,7 @@ services:
       - /var/run/docker.sock:/tmp/docker.sock:ro
       - ./docker/nginx/nginx.tmpl:/etc/docker-gen/templates/nginx.tmpl
     networks:
-      - reverse-proxy
+      - net
 
   letsencrypt:
     image: nginxproxy/acme-companion:2.2
@@ -88,7 +87,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
       - net
-
+    
   #MySQL
   mysql:
     image: mysql:8.2.0
@@ -117,11 +116,13 @@ services:
     image: phpmyadmin:5.2.1
     restart: always
     container_name: phpmyadmin
-    ports:
-      - 8090:80
+    expose:
+      - 80
     environment:
       PMA_HOST: mysql
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      VIRTUAL_HOST: ${PHPMYADMIN_DOMAIN}
+      LETSENCRYPT_HOST: ${PHPMYADMIN_DOMAIN}
     depends_on:
       - mysql
     networks:
@@ -131,8 +132,6 @@ services:
 networks:
   net:
     driver: bridge
-  reverse-proxy:
-    external: true
 
 #Volumes
 volumes:
