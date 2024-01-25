@@ -88,8 +88,8 @@ services:
       - acme:/etc/acme.sh
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
-      - net
-    
+      - reverse-proxy
+
   #MySQL
   mysql:
     image: mysql:8.2.0
