@@ -44,9 +44,10 @@ The database is updated daily by the project [Polyvalent-Scraper](https://github
 * Automation of Nginx configurations generation through [docker-gen](https://github.com/nginx-proxy/docker-gen)
 * Implementation of SSL certificates using [let's encrypt](https://letsencrypt.org/)
 * Addition of a Makefile for time efficiency
+* Automatic build & deployment through Github Actions
 
 ### In progress:
-* Automatic build and deployment through Github Actions
+* Game library
 
 ### Upcoming functionalities: 
 * Game library

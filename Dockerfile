@@ -1,5 +1,9 @@
 FROM php:8.2-fpm
 
+LABEL author="Arnaud ANDRIANOMANANA"
+LABEL org.opencontainers.image.source=https://github.com/aandriano931/home-hub
+LABEL org.opencontainers.image.description="PHP image for laravel application"
+
 # Copy composer.lock and composer.json
 COPY composer.lock composer.json /var/www/
 
@@ -56,6 +60,6 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 # Change current user to www
 USER www
 
-# Expose port 9000 and start php-fpm server
+# Expose port 9000 and 5173 and start php-fpm server
 EXPOSE 9000 5173
 CMD ["php-fpm"]
