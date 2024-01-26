@@ -1,0 +1,26 @@
+name: Deploy Family Hub
+on:
+  push:
+    branches:
+      - 'main'
+jobs:
+  deploy:
+      name: Update code and start deploy script
+      runs-on: ubuntu-latest
+      steps:
+      - name: Install ssh keys
+        # check this thread to understand why its needed:
+        # <https://stackoverflow.com/a/70447517>
+        run: |
+          install -m 600 -D /dev/null ~/.ssh/id_rsa
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.SSH_HOST }} > ~/.ssh/known_hosts
+
+      - name: Connect to server and update code
+        run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd ${{ secrets.WORK_DIR }} && git checkout ${{ secrets.MAIN_BRANCH }} && git pull && exit"
+      
+      - name: Connect to server and start deploy script
+        run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd ${{ secrets.WORK_DIR }} && sh scripts/deploy.sh && exit"
+        
+      - name: Cleanup
+        run: rm -rf ~/.ssh
