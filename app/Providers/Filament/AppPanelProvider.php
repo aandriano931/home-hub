@@ -6,6 +6,7 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Navigation\NavigationGroup;
+use Filament\Navigation\NavigationItem;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
@@ -28,6 +29,13 @@ class AppPanelProvider extends PanelProvider
             ->path('')
             ->colors([
                 'primary' => Color::Amber,
+            ])
+            ->navigationItems([
+                NavigationItem::make('Administration')
+                    ->url('/admin')
+                    ->icon('heroicon-s-cog-6-tooth')
+                    ->sort(2)
+                    ->visible(fn(): bool => auth()->user()->can('view-admin')),
             ])
             ->navigationGroups([
                 NavigationGroup::make()

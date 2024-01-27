@@ -17,6 +17,7 @@ class BankAccountResource extends Resource
     protected static ?string $model = Account::class;
     protected static ?string $label = 'Compte bancaire';
     protected static ?string $navigationGroup = 'Banque';
+    protected static ?int $navigationSort = 1;
 
     public static function form(Form $form): Form
     {

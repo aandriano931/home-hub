@@ -5,7 +5,7 @@ echo "Deploying application ..."
 
 # Rebuilding containers
 docker compose --file docker-compose-prod.yaml up -d
-sleep 10
+sleep 5
 
 # Enter maintenance mode
 docker exec -u 1001 app php artisan down
@@ -16,12 +16,17 @@ docker exec -u 1001 app composer install --no-dev --no-interaction --prefer-dist
 # Migrate database
 docker exec -u 1001 app php artisan migrate --force
 
-# Clear cache
-docker exec -u 1001 app php artisan optimize
+# Clear caches
+docker exec -u 1001 app php artisan route:cache
+sleep 1
+docker exec -u 1001 app php artisan config:cache
 
 # Update Node.js and run the build
 docker exec -u 0 app npm install
 docker exec -u 0 app npm run build
+
+# Publish filament assets
+docker exec -u 1001 app php artisan filament:assets
 
 # Exit maintenance mode
 docker exec -u 1001 app php artisan up

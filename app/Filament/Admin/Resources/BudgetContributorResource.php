@@ -16,6 +16,7 @@ class BudgetContributorResource extends Resource
     protected static ?string $model = BudgetContributor::class;
     protected static ?string $label = 'Contributeur';
     protected static ?string $navigationGroup = 'Budget';
+    protected static ?int $navigationSort = 6;
 
     public static function form(Form $form): Form
     {
