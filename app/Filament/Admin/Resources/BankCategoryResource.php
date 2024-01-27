@@ -18,6 +18,7 @@ class BankCategoryResource extends Resource
     protected static ?string $model = Category::class;
     protected static ?string $label = 'Catégorie';
     protected static ?string $navigationGroup = 'Banque';
+    protected static ?int $navigationSort = 3;
 
     public static function form(Form $form): Form
     {

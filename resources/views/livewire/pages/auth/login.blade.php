@@ -22,7 +22,7 @@ new #[Layout('layouts.guest')] class extends Component
         Session::regenerate();
 
         $this->redirect(
-            session('url.intended', RouteServiceProvider::HOME),
+            session('url.intended', 'home'),
             navigate: true
         );
     }

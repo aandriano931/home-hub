@@ -16,6 +16,7 @@ class BankTransactionResource extends Resource
 {
     protected static ?string $model = Transaction::class;
     protected static ?string $navigationGroup = 'Banque';
+    protected static ?int $navigationSort = 4;
 
     public static function form(Form $form): Form
     {
