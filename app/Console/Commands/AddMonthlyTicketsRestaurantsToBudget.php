@@ -14,6 +14,11 @@ class AddMonthlyTicketsRestaurantsToBudget extends Command
     private const DEFAULT_TR_DEBIT = 175.00;
     private const DEFAULT_TR_LABEL = 'SIMULATION DEPENSES TICKETS RESTAURANTS';
 
+    private const TR_EXCLUDED_MONTHS = [
+        '04/2024',
+        '05/2024',
+    ];
+
     /**
      * @var string
      */
@@ -45,6 +50,9 @@ class AddMonthlyTicketsRestaurantsToBudget extends Command
 
         //If a ticket restaurant bank transaction already exist for a month in the list remove this month
         $monthsRequiringTicketResto = array_diff($formattedMonths, $formattedMonthsWithTicketResto);
+
+        //Remove the excluded months from the list
+        $monthsRequiringTicketResto = array_diff($monthsRequiringTicketResto, self::TR_EXCLUDED_MONTHS);
 
         //For all months without it, insert the ticket restaurant default bank transaction with value_date and operation_date as the last day of the month
         $jointAccount = DB::table('bank_account')->where('alias', '=', 'ftn_joint_account')->get()->first();

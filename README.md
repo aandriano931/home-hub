@@ -47,15 +47,15 @@ The database is updated daily by the project [Polyvalent-Scraper](https://github
 * Automatic build & deployment through Github Actions
 
 ### In progress:
-* Game library
+* Cardboard Games library
 
 ### Upcoming functionalities: 
-* Game library
 * Analysis of electrical consumption
+* Better Logging of errors
+* Library
 * Analysis of water consumption
 * Analysis of wood pellet consumption
 * Setting up a guest user for demonstration purposes
-* Library
 * Cooking recipes
 * ...
 
