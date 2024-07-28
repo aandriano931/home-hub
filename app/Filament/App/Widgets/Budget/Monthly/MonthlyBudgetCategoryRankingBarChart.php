@@ -10,17 +10,18 @@ final class MonthlyBudgetCategoryRankingBarChart extends AbstractBudgetRankingBa
     private const NUMBER_TO_KEEP = 10;
     protected static ?string $heading = 'Classement mensuel des dépenses par sous-catégorie';
     protected static ?string $pollingInterval = null;
+    public bool $isInitializedWithPreviousMonth = false;
 
     protected function getData(): array
     {
         $monthlyData = $this->getMonthlySpendings();
         $this->getChartLabels($monthlyData);
         if ($this->filter === null) {
-            $this->filter = end($this->chartLabels);
+            $this->filter = $this->isInitializedWithPreviousMonth ? $this->chartLabels[count($this->chartLabels) - 2] : end($this->chartLabels);
         }
         $activeFilter = $this->filter;
         $chartData = $this->getChartData($monthlyData, $activeFilter);
-    
+
         return [
             'datasets' => [
                 [
@@ -32,7 +33,7 @@ final class MonthlyBudgetCategoryRankingBarChart extends AbstractBudgetRankingBa
             'labels' => $chartData['labels'],
         ];
     }
-    
+
     protected function getFilters(): ?array
     {
         $filters = [];

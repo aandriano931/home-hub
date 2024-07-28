@@ -9,17 +9,18 @@ final class YearlyBudgetCategoryRankingBarChart extends AbstractBudgetRankingBar
     private const NUMBER_TO_KEEP = 10;
     protected static ?string $heading = 'Classement annuel des dépenses par sous-catégorie';
     protected static ?string $pollingInterval = null;
+    public bool $isInitializedWithPreviousYear = false;
 
     protected function getData(): array
     {
         $yearlyData = $this->getYearlySpendings();
         $this->getChartLabels($yearlyData);
         if ($this->filter === null) {
-            $this->filter = end($this->chartLabels);
+            $this->filter = $this->isInitializedWithPreviousYear ? $this->chartLabels[count($this->chartLabels) - 2] : end($this->chartLabels);
         }
         $activeFilter = $this->filter;
         $chartData = $this->getChartData($yearlyData, $activeFilter);
-    
+
         return [
             'datasets' => [
                 [
@@ -31,7 +32,7 @@ final class YearlyBudgetCategoryRankingBarChart extends AbstractBudgetRankingBar
             'labels' => $chartData['labels'],
         ];
     }
-    
+
     protected function getFilters(): ?array
     {
         foreach ($this->chartLabels as $label) {

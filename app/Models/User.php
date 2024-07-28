@@ -48,12 +48,12 @@ class User extends Authenticatable implements FilamentUser
     {
         // Additionnal security check
         if ($panel->getId() === 'admin') {
-            return in_array($this->email, explode(',', config('user.allowed_admins'))) && $this->hasVerifiedEmail();
+            return in_array($this->email, array_map('trim', explode(',', config('user.allowed_admins')))) && $this->hasVerifiedEmail();
         }
         if ($panel->getId() === 'app') {
-            return in_array($this->email, explode(',', config('user.allowed_users'))) && $this->hasVerifiedEmail();
+            return in_array($this->email, array_map('trim', explode(',', config('user.allowed_users')))) && $this->hasVerifiedEmail();
         }
- 
+
         return false;
     }
 }

@@ -21,9 +21,13 @@ class BudgetYearlyAnalyse extends Page
     protected function getHeaderWidgets(): array
     {
         return [
+            YearlyBudgetParentCategoryPieChart::make(['isInitializedWithPreviousYear' => true]),
             YearlyBudgetParentCategoryPieChart::class,
+            YearlyBudgetCategoryPieChart::make(['isInitializedWithPreviousYear' => true]),
             YearlyBudgetCategoryPieChart::class,
+            YearlyBudgetParentCategoryRankingBarChart::make(['isInitializedWithPreviousYear' => true]),
             YearlyBudgetParentCategoryRankingBarChart::class,
+            YearlyBudgetCategoryRankingBarChart::make(['isInitializedWithPreviousYear' => true]),
             YearlyBudgetCategoryRankingBarChart::class,
         ];
     }

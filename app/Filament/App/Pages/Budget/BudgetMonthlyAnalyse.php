@@ -20,9 +20,13 @@ class BudgetMonthlyAnalyse extends Page
     protected function getHeaderWidgets(): array
     {
         return [
+            MonthlyBudgetParentCategoryPieChart::make(['isInitializedWithPreviousMonth' => true]),
             MonthlyBudgetParentCategoryPieChart::class,
+            MonthlyBudgetCategoryPieChart::make(['isInitializedWithPreviousMonth' => true]),
             MonthlyBudgetCategoryPieChart::class,
+            MonthlyBudgetParentCategoryRankingBarChart::make(['isInitializedWithPreviousMonth' => true]),
             MonthlyBudgetParentCategoryRankingBarChart::class,
+            MonthlyBudgetCategoryRankingBarChart::make(['isInitializedWithPreviousMonth' => true]),
             MonthlyBudgetCategoryRankingBarChart::class,
         ];
     }

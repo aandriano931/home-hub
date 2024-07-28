@@ -3,7 +3,7 @@
 ## Description
 _Experimental_
 
-General-purpose web application project for daily management and experimentation with Laravel and Fialement\
+General-purpose web application project for daily management and experimentation with Laravel and Filament\
 The database is updated daily by the project [Polyvalent-Scraper](https://github.com/aandriano931/polyvalent-scraper)
 
 ## Functionalities:
