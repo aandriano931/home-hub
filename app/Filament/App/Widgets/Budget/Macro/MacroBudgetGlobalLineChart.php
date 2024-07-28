@@ -12,17 +12,18 @@ class MacroBudgetGlobalLineChart extends AbstractBudgetLineChart
     private const SPENDINGS_COLOR = '#8D0C04';
     private const INCOMES_COLOR = '#2ECF53';
     private const AVERAGE_SPENDING_COLOR = '#083BCE';
-    protected static ?string $heading = 'Apports, dépenses mensuelles et moyenne glissante sur ' . self::MOVING_AVERAGE_WINDOW . ' mois';
+    private const BASE_HEADING_LABEL = 'Apports, dépenses mensuelles et moyenne glissante sur ' . self::MOVING_AVERAGE_WINDOW . ' mois';
     protected int | string | array $columnSpan = 'full';
     private array $spendingsData = [];
     private array $chartLabels = [];
     private array $incomesData = [];
+    public bool $isWithoutTravels = false;
 
     protected function getData(): array
     {
         $this->getTotalSpendings();
         $this->getTotalIncomes();
-     
+
         return [
             'datasets' => [
                 [
@@ -63,7 +64,13 @@ class MacroBudgetGlobalLineChart extends AbstractBudgetLineChart
     {
         $transactionRepository = new TransactionRepository();
         $transactionService = new TransactionWidgetService();
-        $spendings = $transactionRepository->getMonthlySpendings(['Virements internes']);
+        if ($this->isWithoutTravels) {
+            $spendings = $transactionRepository->getMonthlySpendings(['Virements internes', 'Voyages']);
+            self::$heading = self::BASE_HEADING_LABEL . ' (hors voyages)';
+        } else {
+            $spendings = $transactionRepository->getMonthlySpendings(['Virements internes']);
+            self::$heading = self::BASE_HEADING_LABEL;
+        }
         $improvedSpendings = $transactionService->addPeriodTotalAndPercentage($spendings);
         array_pop($improvedSpendings);
         foreach ($improvedSpendings as $label => $period) {

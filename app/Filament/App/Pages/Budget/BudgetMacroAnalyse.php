@@ -24,6 +24,7 @@ class BudgetMacroAnalyse extends Page
     {
         return [
             MacroBudgetGlobalLineChart::class,
+            MacroBudgetGlobalLineChart::make(['isWithoutTravels' => true]),
             MacroBudgetParentCategoryRankingBarChart::class,
             MacroBudgetCategoryRankingBarChart::class,
             MacroBudgetParentCategoryPieChart::class,
