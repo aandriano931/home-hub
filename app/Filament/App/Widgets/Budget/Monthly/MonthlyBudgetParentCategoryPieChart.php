@@ -3,6 +3,7 @@
 namespace App\Filament\App\Widgets\Budget\Monthly;
 
 use App\Filament\App\Widgets\Budget\AbstractBudgetPieChart;
+use App\Models\Bank\Account;
 use Illuminate\Support\Carbon;
 
 final class MonthlyBudgetParentCategoryPieChart extends AbstractBudgetPieChart
@@ -13,10 +14,10 @@ final class MonthlyBudgetParentCategoryPieChart extends AbstractBudgetPieChart
 
     protected function getData(): array
     {
-        $monthlyData = $this->getMonthlySpendings();
+        $monthlyData = $this->getMonthlySpendings(Account::JOIN_ACCOUNT_ALIAS);
         $this->getChartLabels($monthlyData);
         if ($this->filter === null) {
-            $this->filter = $this->isInitializedWithPreviousMonth ? $this->chartLabels[count($this->chartLabels) - 2] : end($this->chartLabels);
+            $this->filter = $this->isInitializedWithPreviousMonth && !empty($this->chartLabels) ? $this->chartLabels[count($this->chartLabels) - 2] : end($this->chartLabels);
         }
         $activeFilter = $this->filter;
         $chartData = $this->getChartData($monthlyData, $activeFilter);

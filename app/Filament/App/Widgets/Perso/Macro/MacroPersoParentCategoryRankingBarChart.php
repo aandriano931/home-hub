@@ -1,25 +1,25 @@
 <?php
 
-namespace App\Filament\App\Widgets\Budget\Macro;
+namespace App\Filament\App\Widgets\Perso\Macro;
 
-use App\Filament\App\Widgets\Budget\AbstractBudgetPieChart;
-use App\Models\Bank\Account;
+use App\Filament\App\Widgets\Perso\AbstractPersoRankingBarChart;
 
-final class MacroBudgetParentCategoryPieChart extends AbstractBudgetPieChart
+final class MacroPersoParentCategoryRankingBarChart extends AbstractPersoRankingBarChart
 {
-    protected static ?string $heading = 'Part des dépenses totales par catégorie';
+    protected static ?string $heading = 'Classement des dépenses par catégorie (hors voyages)';
     protected static ?string $pollingInterval = null;
+
     protected function getData(): array
     {
-        $results = $this->getMacroSpendings(Account::JOIN_ACCOUNT_ALIAS);
+        $results = $this->getMacroSpendings();
         $chartData = $this->getChartData($results);
     
         return [
             'datasets' => [
                 [
-                    'label' => 'Dépenses totales par catégorie',
                     'data' => $chartData['data'],
                     'backgroundColor' => $chartData['colors'],
+                    'borderColor' => $chartData['colors'],
                 ],
             ],
             'labels' => $chartData['labels'],
@@ -29,14 +29,15 @@ final class MacroBudgetParentCategoryPieChart extends AbstractBudgetPieChart
     private function getChartData(array $data): array
     {
         $chartData = [];
-        ksort($data['parent_categories']);
+        uasort($data['parent_categories'], function ($a, $b) {
+            return $b['total'] <=> $a['total'];
+        });
         foreach ($data['parent_categories'] as $key => $row) {
-            $chartData['data'][] = $row['percentage'];
+            $chartData['data'][] = $row['total'];
             $chartData['labels'][] = $key;
             $chartData['colors'][] = $row['color'];
         }
-        
+
         return $chartData;
     }
-
 }

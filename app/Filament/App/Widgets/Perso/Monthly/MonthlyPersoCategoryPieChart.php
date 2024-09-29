@@ -1,30 +1,31 @@
 <?php
 
-namespace App\Filament\App\Widgets\Budget\Yearly;
+namespace App\Filament\App\Widgets\Perso\Monthly;
 
-use App\Filament\App\Widgets\Budget\AbstractBudgetPieChart;
+use App\Filament\App\Widgets\Perso\AbstractPersoPieChart;
 use App\Models\Bank\Account;
 use Illuminate\Support\Carbon;
 
-final class YearlyBudgetCategoryPieChart extends AbstractBudgetPieChart
+final class MonthlyPersoCategoryPieChart extends AbstractPersoPieChart
 {
-    protected static ?string $heading = 'Dépenses annuelles par sous-catégorie';
+    protected static ?string $heading = 'Dépenses mensuelles par sous-catégorie';
     protected static ?string $pollingInterval = null;
-    public bool $isInitializedWithPreviousYear = false;
+    public bool $isInitializedWithPreviousMonth = false;
+
     protected function getData(): array
     {
-        $yearlyData = $this->getYearlySpendings(Account::JOIN_ACCOUNT_ALIAS);
-        $this->getChartLabels($yearlyData);
+        $monthlyData = $this->getMonthlySpendings();
+        $this->getChartLabels($monthlyData);
         if ($this->filter === null) {
-            $this->filter = $this->isInitializedWithPreviousYear ? $this->chartLabels[count($this->chartLabels) - 2] : end($this->chartLabels);
+            $this->filter = $this->isInitializedWithPreviousMonth ? $this->chartLabels[count($this->chartLabels) - 2] : end($this->chartLabels);
         }
         $activeFilter = $this->filter;
-        $chartData = $this->getChartData($yearlyData, $activeFilter);
+        $chartData = $this->getChartData($monthlyData, $activeFilter);
 
         return [
             'datasets' => [
                 [
-                    'label' => 'Dépenses annuelles pour ' . $activeFilter,
+                    'label' => 'Dépenses mensuelles pour ' . $activeFilter,
                     'data' => $chartData['data'],
                     'backgroundColor' => $chartData['colors'],
                 ],
@@ -37,9 +38,9 @@ final class YearlyBudgetCategoryPieChart extends AbstractBudgetPieChart
     {
         $filters = [];
         foreach ($this->chartLabels as $label) {
-            $date = Carbon::createFromFormat('Y', $label);
-            $formattedDate = $date->isoFormat('YYYY');
-            $filters[$label] = $formattedDate;
+            $date = Carbon::createFromFormat('Y-m', $label);
+            $formattedDate = $date->isoFormat('MMMM YYYY');
+            $filters[$label] = ucfirst(trans($formattedDate));
         }
 
         return $filters;

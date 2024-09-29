@@ -1,20 +1,20 @@
 <?php
 
-namespace App\Filament\App\Widgets\Budget\Monthly;
+namespace App\Filament\App\Widgets\Perso\Monthly;
 
-use App\Filament\App\Widgets\Budget\AbstractBudgetPieChart;
-use App\Models\Bank\Account;
+use App\Filament\App\Widgets\Perso\AbstractPersoRankingBarChart;
 use Illuminate\Support\Carbon;
 
-final class MonthlyBudgetCategoryPieChart extends AbstractBudgetPieChart
+final class MonthlyPersoCategoryRankingBarChart extends AbstractPersoRankingBarChart
 {
-    protected static ?string $heading = 'Dépenses mensuelles par sous-catégorie';
+    private const NUMBER_TO_KEEP = 10;
+    protected static ?string $heading = 'Classement mensuel des dépenses par sous-catégorie';
     protected static ?string $pollingInterval = null;
     public bool $isInitializedWithPreviousMonth = false;
 
     protected function getData(): array
     {
-        $monthlyData = $this->getMonthlySpendings(Account::JOIN_ACCOUNT_ALIAS);
+        $monthlyData = $this->getMonthlySpendings();
         $this->getChartLabels($monthlyData);
         if ($this->filter === null) {
             $this->filter = $this->isInitializedWithPreviousMonth ? $this->chartLabels[count($this->chartLabels) - 2] : end($this->chartLabels);
@@ -25,9 +25,9 @@ final class MonthlyBudgetCategoryPieChart extends AbstractBudgetPieChart
         return [
             'datasets' => [
                 [
-                    'label' => 'Dépenses mensuelles pour ' . $activeFilter,
                     'data' => $chartData['data'],
                     'backgroundColor' => $chartData['colors'],
+                    'borderColor' => $chartData['colors'],
                 ],
             ],
             'labels' => $chartData['labels'],
@@ -51,8 +51,12 @@ final class MonthlyBudgetCategoryPieChart extends AbstractBudgetPieChart
         $chartData = [];
         if (!is_null($filter)) {
             $rawData = $data[$filter];
-            foreach ($rawData['categories'] as $row) {
-                $chartData['data'][] = $row['percentage'];
+            usort($rawData['categories'], function ($a, $b) {
+                return $b['total'] <=> $a['total'];
+            });
+            $topCategories = array_slice($rawData['categories'], 0, self::NUMBER_TO_KEEP);
+            foreach ($topCategories as $row) {
+                $chartData['data'][] = $row['total'];
                 $chartData['labels'][] = $row['label'];
                 $chartData['colors'][] = $row['color'];
             }

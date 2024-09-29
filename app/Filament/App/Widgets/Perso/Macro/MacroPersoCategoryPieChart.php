@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Filament\App\Widgets\Budget\Macro;
+namespace App\Filament\App\Widgets\Perso\Macro;
 
-use App\Filament\App\Widgets\Budget\AbstractBudgetPieChart;
+use App\Filament\App\Widgets\Perso\AbstractPersoPieChart;
 use App\Models\Bank\Account;
 
-final class MacroBudgetCategoryPieChart extends AbstractBudgetPieChart
+final class MacroPersoCategoryPieChart extends AbstractPersoPieChart
 {
     private const SUBCATEGORY_MINIMUM_THRESHOLD = 0.5;
     protected static ?string $heading = 'Part des dépenses totales par sous-catégorie (>=' . self::SUBCATEGORY_MINIMUM_THRESHOLD . '%)';
@@ -13,7 +13,7 @@ final class MacroBudgetCategoryPieChart extends AbstractBudgetPieChart
     
     protected function getData(): array
     {
-        $results = $this->getMacroSpendings(Account::JOIN_ACCOUNT_ALIAS);
+        $results = $this->getMacroSpendings();
         $chartData = $this->getChartData($results);
     
         return [

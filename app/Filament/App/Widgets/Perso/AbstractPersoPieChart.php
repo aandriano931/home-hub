@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\App\Widgets\Budget;
+namespace App\Filament\App\Widgets\Perso;
 
 use App\Models\Bank\Account;
 use App\Repository\Bank\TransactionRepository;
@@ -8,7 +8,7 @@ use Filament\Support\RawJs;
 use Filament\Widgets\ChartWidget;
 use App\Services\Bank\TransactionWidgetService;
 
-abstract class AbstractBudgetPieChart extends ChartWidget
+abstract class AbstractPersoPieChart extends ChartWidget
 {
     protected static ?string $pollingInterval = null;
     protected array $chartLabels = [];
@@ -57,31 +57,31 @@ abstract class AbstractBudgetPieChart extends ChartWidget
         $this->chartLabels = $chartLabels;
     }
 
-    protected function getMacroSpendings(string $accountAlias): array
+    protected function getMacroSpendings(): array
     {
         $transactionRepository = new TransactionRepository();
         $transactionService = new TransactionWidgetService();
-        $results = $transactionRepository->getMonthlySpendings(self::EXCLUDED_CATEGORIES, Account::JOIN_ACCOUNT_ALIAS);
+        $results = $transactionRepository->getMonthlySpendings([], Account::PERSO_ACCOUNT_ALIAS);
         
         return $transactionService->addTotalAndPercentage($results);
     }
 
-    protected function getYearlySpendings(string $accountAlias): array
+    protected function getYearlySpendings(): array
     {
         $transactionRepository = new TransactionRepository();
         $transactionService = new TransactionWidgetService();
-        $yearlyResults = $transactionRepository->getYearlySpendings(self::EXCLUDED_CATEGORIES, Account::JOIN_ACCOUNT_ALIAS);
+        $yearlyResults = $transactionRepository->getYearlySpendings([], Account::PERSO_ACCOUNT_ALIAS);
         $improvedYearlyResults = $transactionService->addPeriodTotalAndPercentage($yearlyResults);
         array_pop($improvedYearlyResults);
 
         return  $improvedYearlyResults;
     }
 
-    protected function getMonthlySpendings(string $accountAlias): array
+    protected function getMonthlySpendings(): array
     {
         $transactionRepository = new TransactionRepository();
         $transactionService = new TransactionWidgetService();
-        $monthlyResults = $transactionRepository->getMonthlySpendings(self::EXCLUDED_CATEGORIES, Account::JOIN_ACCOUNT_ALIAS);
+        $monthlyResults = $transactionRepository->getMonthlySpendings([], Account::PERSO_ACCOUNT_ALIAS);
         $improvedMonthlyResults = $transactionService->addPeriodTotalAndPercentage($monthlyResults);
         array_pop($improvedMonthlyResults);
 

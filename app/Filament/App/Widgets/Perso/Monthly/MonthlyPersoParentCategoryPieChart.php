@@ -1,23 +1,23 @@
 <?php
 
-namespace App\Filament\App\Widgets\Budget\Monthly;
+namespace App\Filament\App\Widgets\Perso\Monthly;
 
-use App\Filament\App\Widgets\Budget\AbstractBudgetPieChart;
+use App\Filament\App\Widgets\Perso\AbstractPersoPieChart;
 use App\Models\Bank\Account;
 use Illuminate\Support\Carbon;
 
-final class MonthlyBudgetCategoryPieChart extends AbstractBudgetPieChart
+final class MonthlyPersoParentCategoryPieChart extends AbstractPersoPieChart
 {
-    protected static ?string $heading = 'Dépenses mensuelles par sous-catégorie';
+    protected static ?string $heading = 'Dépenses mensuelles par catégorie';
     protected static ?string $pollingInterval = null;
     public bool $isInitializedWithPreviousMonth = false;
 
     protected function getData(): array
     {
-        $monthlyData = $this->getMonthlySpendings(Account::JOIN_ACCOUNT_ALIAS);
+        $monthlyData = $this->getMonthlySpendings();
         $this->getChartLabels($monthlyData);
         if ($this->filter === null) {
-            $this->filter = $this->isInitializedWithPreviousMonth ? $this->chartLabels[count($this->chartLabels) - 2] : end($this->chartLabels);
+            $this->filter = $this->isInitializedWithPreviousMonth && !empty($this->chartLabels) ? $this->chartLabels[count($this->chartLabels) - 2] : end($this->chartLabels);
         }
         $activeFilter = $this->filter;
         $chartData = $this->getChartData($monthlyData, $activeFilter);
@@ -49,16 +49,15 @@ final class MonthlyBudgetCategoryPieChart extends AbstractBudgetPieChart
     private function getChartData(array $data, ?string $filter): array
     {
         $chartData = [];
-        if (!is_null($filter)) {
+        if (!is_null($filter) && !empty($data)) {
             $rawData = $data[$filter];
-            foreach ($rawData['categories'] as $row) {
+            foreach ($rawData['parent_categories'] as $label => $row) {
                 $chartData['data'][] = $row['percentage'];
-                $chartData['labels'][] = $row['label'];
+                $chartData['labels'][] = $label;
                 $chartData['colors'][] = $row['color'];
             }
         }
 
         return $chartData;
     }
-
 }

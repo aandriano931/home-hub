@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Filament\App\Widgets\Budget\Macro;
+namespace App\Filament\App\Widgets\Perso\Macro;
 
-use App\Filament\App\Widgets\Budget\AbstractBudgetLineChart;
+use App\Filament\App\Widgets\Perso\AbstractPersoLineChart;
 use App\Models\Bank\Account;
 use App\Repository\Bank\TransactionRepository;
 use App\Services\Bank\TransactionWidgetService;
 
-final class MacroBudgetParentCategoryLineChart extends AbstractBudgetLineChart
+final class MacroPersoParentCategoryLineChart extends AbstractPersoLineChart
 {
     private const AVERAGE_CATEGORY_SPENDING_COLOR = '#F60DEB';
     protected static ?string $heading = 'Dépenses par catégorie et moyenne glissante sur ' . self::MOVING_AVERAGE_WINDOW . ' mois.';
@@ -53,7 +53,7 @@ final class MacroBudgetParentCategoryLineChart extends AbstractBudgetLineChart
     {
         $transactionRepository = new TransactionRepository();
         $transactionService = new TransactionWidgetService();
-        $spendings = $transactionRepository->getMonthlySpendings(['Virements internes'], Account::JOIN_ACCOUNT_ALIAS);
+        $spendings = $transactionRepository->getMonthlySpendings(['Virements internes'], Account::PERSO_ACCOUNT_ALIAS);
         $improvedSpendings = $transactionService->addPeriodTotalAndPercentage($spendings);
         array_pop($improvedSpendings);
         $this->rawData = $improvedSpendings;

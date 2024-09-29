@@ -24,5 +24,8 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('view-admin', function ($user) {
             return in_array($user->email, explode(',', config('user.allowed_admins'))) && $user->hasVerifiedEmail();
         });
+        Gate::define('view-perso', function ($user) {
+            return in_array($user->email, explode(',', config('user.allowed_admins')));
+        });
     }
 }

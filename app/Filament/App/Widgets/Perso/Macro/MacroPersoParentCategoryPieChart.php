@@ -1,17 +1,17 @@
 <?php
 
-namespace App\Filament\App\Widgets\Budget\Macro;
+namespace App\Filament\App\Widgets\Perso\Macro;
 
-use App\Filament\App\Widgets\Budget\AbstractBudgetPieChart;
+use App\Filament\App\Widgets\Perso\AbstractPersoPieChart;
 use App\Models\Bank\Account;
 
-final class MacroBudgetParentCategoryPieChart extends AbstractBudgetPieChart
+final class MacroPersoParentCategoryPieChart extends AbstractPersoPieChart
 {
     protected static ?string $heading = 'Part des dépenses totales par catégorie';
     protected static ?string $pollingInterval = null;
     protected function getData(): array
     {
-        $results = $this->getMacroSpendings(Account::JOIN_ACCOUNT_ALIAS);
+        $results = $this->getMacroSpendings();
         $chartData = $this->getChartData($results);
     
         return [

@@ -1,19 +1,19 @@
 <?php
 
-namespace App\Filament\App\Widgets\Budget\Yearly;
+namespace App\Filament\App\Widgets\Perso\Yearly;
 
-use App\Filament\App\Widgets\Budget\AbstractBudgetPieChart;
-use App\Models\Bank\Account;
-use Illuminate\Support\Carbon;
+use App\Filament\App\Widgets\Perso\AbstractPersoRankingBarChart;
 
-final class YearlyBudgetCategoryPieChart extends AbstractBudgetPieChart
+final class YearlyPersoCategoryRankingBarChart extends AbstractPersoRankingBarChart
 {
-    protected static ?string $heading = 'Dépenses annuelles par sous-catégorie';
+    private const NUMBER_TO_KEEP = 10;
+    protected static ?string $heading = 'Classement annuel des dépenses par sous-catégorie';
     protected static ?string $pollingInterval = null;
     public bool $isInitializedWithPreviousYear = false;
+
     protected function getData(): array
     {
-        $yearlyData = $this->getYearlySpendings(Account::JOIN_ACCOUNT_ALIAS);
+        $yearlyData = $this->getYearlySpendings();
         $this->getChartLabels($yearlyData);
         if ($this->filter === null) {
             $this->filter = $this->isInitializedWithPreviousYear ? $this->chartLabels[count($this->chartLabels) - 2] : end($this->chartLabels);
@@ -24,9 +24,9 @@ final class YearlyBudgetCategoryPieChart extends AbstractBudgetPieChart
         return [
             'datasets' => [
                 [
-                    'label' => 'Dépenses annuelles pour ' . $activeFilter,
                     'data' => $chartData['data'],
                     'backgroundColor' => $chartData['colors'],
+                    'borderColor' => $chartData['colors'],
                 ],
             ],
             'labels' => $chartData['labels'],
@@ -35,11 +35,8 @@ final class YearlyBudgetCategoryPieChart extends AbstractBudgetPieChart
 
     protected function getFilters(): ?array
     {
-        $filters = [];
         foreach ($this->chartLabels as $label) {
-            $date = Carbon::createFromFormat('Y', $label);
-            $formattedDate = $date->isoFormat('YYYY');
-            $filters[$label] = $formattedDate;
+            $filters[$label] = $label;
         }
 
         return $filters;
@@ -50,8 +47,12 @@ final class YearlyBudgetCategoryPieChart extends AbstractBudgetPieChart
         $chartData = [];
         if (!is_null($filter)) {
             $rawData = $data[$filter];
-            foreach ($rawData['categories'] as $row) {
-                $chartData['data'][] = $row['percentage'];
+            usort($rawData['categories'], function ($a, $b) {
+                return $b['total'] <=> $a['total'];
+            });
+            $topCategories = array_slice($rawData['categories'], 0, self::NUMBER_TO_KEEP);
+            foreach ($topCategories as $row) {
+                $chartData['data'][] = $row['total'];
                 $chartData['labels'][] = $row['label'];
                 $chartData['colors'][] = $row['color'];
             }
@@ -59,5 +60,4 @@ final class YearlyBudgetCategoryPieChart extends AbstractBudgetPieChart
 
         return $chartData;
     }
-
 }

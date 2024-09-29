@@ -2,6 +2,7 @@
 
 namespace App\Filament\App\Widgets\Budget;
 
+use App\Models\Bank\Account;
 use App\Repository\Bank\TransactionRepository;
 use Filament\Support\RawJs;
 use Filament\Widgets\ChartWidget;
@@ -12,6 +13,8 @@ abstract class AbstractBudgetRankingBarChart extends ChartWidget
     protected const EXCLUDED_CATEGORIES = ['Voyages', 'Virements internes'];
     protected static ?string $pollingInterval = null;
     protected array $chartLabels = [];
+    public string $accountAlias = Account::JOIN_ACCOUNT_ALIAS;
+
 
     protected function getType(): string
     {
@@ -71,7 +74,7 @@ abstract class AbstractBudgetRankingBarChart extends ChartWidget
     {
         $transactionRepository = new TransactionRepository();
         $transactionService = new TransactionWidgetService();
-        $results = $transactionRepository->getMonthlySpendings(self::EXCLUDED_CATEGORIES);
+        $results = $transactionRepository->getMonthlySpendings(self::EXCLUDED_CATEGORIES, Account::JOIN_ACCOUNT_ALIAS);
         
         return $transactionService->addTotalAndPercentage($results);
     }
@@ -80,7 +83,7 @@ abstract class AbstractBudgetRankingBarChart extends ChartWidget
     {
         $transactionRepository = new TransactionRepository();
         $transactionService = new TransactionWidgetService();
-        $yearlyResults = $transactionRepository->getYearlySpendings(self::EXCLUDED_CATEGORIES);
+        $yearlyResults = $transactionRepository->getYearlySpendings(self::EXCLUDED_CATEGORIES, Account::JOIN_ACCOUNT_ALIAS);
         $improvedYearlyResults = $transactionService->addPeriodTotalAndPercentage($yearlyResults);
         array_pop($improvedYearlyResults);
 
@@ -91,7 +94,7 @@ abstract class AbstractBudgetRankingBarChart extends ChartWidget
     {
         $transactionRepository = new TransactionRepository();
         $transactionService = new TransactionWidgetService();
-        $monthlyResults = $transactionRepository->getMonthlySpendings(self::EXCLUDED_CATEGORIES);
+        $monthlyResults = $transactionRepository->getMonthlySpendings(self::EXCLUDED_CATEGORIES, Account::JOIN_ACCOUNT_ALIAS);
         $improvedMonthlyResults = $transactionService->addPeriodTotalAndPercentage($monthlyResults);
         array_pop($improvedMonthlyResults);
 

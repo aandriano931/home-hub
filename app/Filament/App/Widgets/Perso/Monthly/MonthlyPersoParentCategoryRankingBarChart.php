@@ -1,20 +1,19 @@
 <?php
 
-namespace App\Filament\App\Widgets\Budget\Monthly;
+namespace App\Filament\App\Widgets\Perso\Monthly;
 
-use App\Filament\App\Widgets\Budget\AbstractBudgetPieChart;
-use App\Models\Bank\Account;
+use App\Filament\App\Widgets\Perso\AbstractPersoRankingBarChart;
 use Illuminate\Support\Carbon;
 
-final class MonthlyBudgetCategoryPieChart extends AbstractBudgetPieChart
+final class MonthlyPersoParentCategoryRankingBarChart extends AbstractPersoRankingBarChart
 {
-    protected static ?string $heading = 'Dépenses mensuelles par sous-catégorie';
+    protected static ?string $heading = 'Classement mensuel des dépenses par catégorie';
     protected static ?string $pollingInterval = null;
     public bool $isInitializedWithPreviousMonth = false;
 
     protected function getData(): array
     {
-        $monthlyData = $this->getMonthlySpendings(Account::JOIN_ACCOUNT_ALIAS);
+        $monthlyData = $this->getMonthlySpendings();
         $this->getChartLabels($monthlyData);
         if ($this->filter === null) {
             $this->filter = $this->isInitializedWithPreviousMonth ? $this->chartLabels[count($this->chartLabels) - 2] : end($this->chartLabels);
@@ -25,14 +24,15 @@ final class MonthlyBudgetCategoryPieChart extends AbstractBudgetPieChart
         return [
             'datasets' => [
                 [
-                    'label' => 'Dépenses mensuelles pour ' . $activeFilter,
                     'data' => $chartData['data'],
                     'backgroundColor' => $chartData['colors'],
+                    'borderColor' =>$chartData['colors'],
                 ],
             ],
             'labels' => $chartData['labels'],
         ];
     }
+
 
     protected function getFilters(): ?array
     {
@@ -51,9 +51,12 @@ final class MonthlyBudgetCategoryPieChart extends AbstractBudgetPieChart
         $chartData = [];
         if (!is_null($filter)) {
             $rawData = $data[$filter];
-            foreach ($rawData['categories'] as $row) {
-                $chartData['data'][] = $row['percentage'];
-                $chartData['labels'][] = $row['label'];
+            uasort($rawData['parent_categories'], function ($a, $b) {
+                return $b['total'] <=> $a['total'];
+            });
+            foreach ($rawData['parent_categories'] as $label => $row) {
+                $chartData['data'][] = $row['total'];
+                $chartData['labels'][] = $label;
                 $chartData['colors'][] = $row['color'];
             }
         }

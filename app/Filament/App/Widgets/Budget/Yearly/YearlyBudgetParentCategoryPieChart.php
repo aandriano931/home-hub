@@ -3,6 +3,7 @@
 namespace App\Filament\App\Widgets\Budget\Yearly;
 
 use App\Filament\App\Widgets\Budget\AbstractBudgetPieChart;
+use App\Models\Bank\Account;
 use Illuminate\Support\Carbon;
 
 final class YearlyBudgetParentCategoryPieChart extends AbstractBudgetPieChart
@@ -13,7 +14,7 @@ final class YearlyBudgetParentCategoryPieChart extends AbstractBudgetPieChart
 
     protected function getData(): array
     {
-        $yearlyData = $this->getYearlySpendings();
+        $yearlyData = $this->getYearlySpendings(Account::JOIN_ACCOUNT_ALIAS);
         $this->getChartLabels($yearlyData);
         if ($this->filter === null) {
             $this->filter = $this->isInitializedWithPreviousYear ? $this->chartLabels[count($this->chartLabels) - 2] : end($this->chartLabels);

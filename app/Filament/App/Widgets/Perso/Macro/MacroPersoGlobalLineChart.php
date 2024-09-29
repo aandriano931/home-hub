@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Filament\App\Widgets\Budget\Macro;
+namespace App\Filament\App\Widgets\Perso\Macro;
 
-use App\Filament\App\Widgets\Budget\AbstractBudgetLineChart;
+use App\Filament\App\Widgets\Perso\AbstractPersoLineChart;
 use App\Models\Bank\Account;
 use App\Repository\Bank\TransactionRepository;
 use App\Services\Bank\TransactionWidgetService;
 
-class MacroBudgetGlobalLineChart extends AbstractBudgetLineChart
+class MacroPersoGlobalLineChart extends AbstractPersoLineChart
 {
     protected const MOVING_AVERAGE_WINDOW = 6;
     private const SPENDINGS_COLOR = '#8D0C04';
@@ -66,10 +66,10 @@ class MacroBudgetGlobalLineChart extends AbstractBudgetLineChart
         $transactionRepository = new TransactionRepository();
         $transactionService = new TransactionWidgetService();
         if ($this->isWithoutTravels) {
-            $spendings = $transactionRepository->getMonthlySpendings(['Virements internes', 'Voyages'], Account::JOIN_ACCOUNT_ALIAS);
+            $spendings = $transactionRepository->getMonthlySpendings(['Virements internes', 'Voyages'], Account::PERSO_ACCOUNT_ALIAS);
             self::$heading = self::BASE_HEADING_LABEL . ' (hors voyages)';
         } else {
-            $spendings = $transactionRepository->getMonthlySpendings(['Virements internes'], Account::JOIN_ACCOUNT_ALIAS);
+            $spendings = $transactionRepository->getMonthlySpendings(['Virements internes'], Account::PERSO_ACCOUNT_ALIAS);
             self::$heading = self::BASE_HEADING_LABEL;
         }
         $improvedSpendings = $transactionService->addPeriodTotalAndPercentage($spendings);
@@ -85,7 +85,7 @@ class MacroBudgetGlobalLineChart extends AbstractBudgetLineChart
     private function getTotalIncomes(): void
     {
         $transactionRepository = new TransactionRepository();
-        $incomes = $transactionRepository->getMonthlyIncomes([], Account::JOIN_ACCOUNT_ALIAS);
+        $incomes = $transactionRepository->getMonthlyIncomes([], Account::PERSO_ACCOUNT_ALIAS);
         foreach ($incomes as $income) {
             $incomesData[] = (float) $income->total_credit;
         }

@@ -1,19 +1,19 @@
 <?php
 
-namespace App\Filament\App\Widgets\Budget\Yearly;
+namespace App\Filament\App\Widgets\Perso\Yearly;
 
-use App\Filament\App\Widgets\Budget\AbstractBudgetPieChart;
+use App\Filament\App\Widgets\Perso\AbstractPersoPieChart;
 use App\Models\Bank\Account;
 use Illuminate\Support\Carbon;
 
-final class YearlyBudgetCategoryPieChart extends AbstractBudgetPieChart
+final class YearlyPersoCategoryPieChart extends AbstractPersoPieChart
 {
     protected static ?string $heading = 'Dépenses annuelles par sous-catégorie';
     protected static ?string $pollingInterval = null;
     public bool $isInitializedWithPreviousYear = false;
     protected function getData(): array
     {
-        $yearlyData = $this->getYearlySpendings(Account::JOIN_ACCOUNT_ALIAS);
+        $yearlyData = $this->getYearlySpendings();
         $this->getChartLabels($yearlyData);
         if ($this->filter === null) {
             $this->filter = $this->isInitializedWithPreviousYear ? $this->chartLabels[count($this->chartLabels) - 2] : end($this->chartLabels);
