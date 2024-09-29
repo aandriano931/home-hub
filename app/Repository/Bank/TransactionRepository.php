@@ -113,6 +113,39 @@ class TransactionRepository
             ->get();
     }
 
+        /**
+     * getMonthlyIncomes
+     *
+     * @param  array $excludedCategories
+     * @param  DateTime $startDate
+     * @return Collection
+     */
+    public function getMonthlyIncomesForCategoryId(array $excludedCategories, string $accountAlias, ?DateTime $startDate = null, ?string $categoryId = null): Collection {
+        $query = DB::table($this->table)
+            ->join('bank_category', 'bank_category.id', '=', 'bank_transaction.bank_category_id')
+            ->join('bank_account', 'bank_account.id', '=', 'bank_transaction.bank_account_id')
+            ->select(
+                DB::raw("CONCAT(YEAR(operation_date), '-', LPAD(MONTH(operation_date), 2, '0')) AS period"),
+                DB::raw("SUM(credit) AS total_credit"),
+            )
+            ->where('operation_date', '>=', $this->getStartDateString($startDate, $accountAlias))
+            ->where('bank_account.alias', '=', $accountAlias)
+            ;
+
+        if (!empty($categoryId)) {
+            $query->where('bank_category.id', '=', $categoryId);
+        }
+
+        if (!empty($excludedCategories)) {
+            $query->whereNotIn('bank_category.name', $excludedCategories);
+        }
+
+        return $query
+            ->groupBy('period')
+            ->orderBy('period')
+            ->get();
+    }
+
     private function getStartDateString(?DateTime $startDate, string $accountAlias): string
     {
         if (is_null($startDate)) {

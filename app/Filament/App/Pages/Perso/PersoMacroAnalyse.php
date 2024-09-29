@@ -24,7 +24,6 @@ class PersoMacroAnalyse extends Page
     {
         return [
             MacroPersoGlobalLineChart::class,
-            MacroPersoGlobalLineChart::make(properties: ['isWithoutTravels' => true]),
             MacroPersoParentCategoryRankingBarChart::class,
             MacroPersoCategoryRankingBarChart::class,
             MacroPersoParentCategoryPieChart::class,
