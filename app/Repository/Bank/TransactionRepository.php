@@ -113,14 +113,9 @@ class TransactionRepository
             ->get();
     }
 
-        /**
-     * getMonthlyIncomes
-     *
-     * @param  array $excludedCategories
-     * @param  DateTime $startDate
-     * @return Collection
-     */
     public function getMonthlyIncomesForCategoryId(array $excludedCategories, string $accountAlias, ?DateTime $startDate = null, ?string $categoryId = null): Collection {
+        $periods = $this->getMonthlyPeriods($startDate, $accountAlias);
+        $periodsTable = DB::table(DB::raw('(SELECT "' . implode('" AS period UNION SELECT "', $periods) . '" AS period) AS periods'));
         $query = DB::table($this->table)
             ->join('bank_category', 'bank_category.id', '=', 'bank_transaction.bank_category_id')
             ->join('bank_account', 'bank_account.id', '=', 'bank_transaction.bank_account_id')
@@ -129,22 +124,30 @@ class TransactionRepository
                 DB::raw("SUM(credit) AS total_credit"),
             )
             ->where('operation_date', '>=', $this->getStartDateString($startDate, $accountAlias))
-            ->where('bank_account.alias', '=', $accountAlias)
-            ;
-
+            ->where('bank_account.alias', '=', $accountAlias);
+    
         if (!empty($categoryId)) {
             $query->where('bank_category.id', '=', $categoryId);
         }
-
+    
         if (!empty($excludedCategories)) {
             $query->whereNotIn('bank_category.name', $excludedCategories);
         }
 
-        return $query
-            ->groupBy('period')
+        $query->groupBy(DB::raw("CONCAT(YEAR(operation_date), '-', LPAD(MONTH(operation_date), 2, '0'))"));
+    
+        $result = $periodsTable
+            ->leftJoinSub($query, 'transactions', 'periods.period', '=', 'transactions.period')
+            ->select(
+                'periods.period',
+                DB::raw('COALESCE(transactions.total_credit, 0.0) AS total_credit')
+            )
             ->orderBy('period')
             ->get();
+    
+        return $result;
     }
+
 
     private function getStartDateString(?DateTime $startDate, string $accountAlias): string
     {
@@ -157,6 +160,26 @@ class TransactionRepository
         }
 
         return $startDate->format('Y-m-d');
+    }
+
+    private function getMonthlyPeriods(?DateTime $startDate, string $accountAlias): array
+    {
+        if (is_null($startDate)) {
+            $startDate = new DateTime(
+                $accountAlias === Account::PERSO_ACCOUNT_ALIAS
+                ? self::DEFAULT_PERSO_ACCOUNT_START_DATE
+                : self::DEFAULT_JOIN_ACCOUNT_START_DATE
+            );
+        }
+        $endDate = new DateTime('last day of this month');
+        $periods = [];
+        $currentDate = clone $startDate;
+        while ($currentDate <= $endDate) {
+            $periods[] = $currentDate->format('Y-m');
+            $currentDate->modify('+1 month');
+        }
+
+        return $periods;
     }
 
 }

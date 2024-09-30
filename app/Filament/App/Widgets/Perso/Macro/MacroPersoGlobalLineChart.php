@@ -13,22 +13,17 @@ class MacroPersoGlobalLineChart extends AbstractPersoLineChart
     private const SPENDINGS_COLOR = '#8D0C04';
     private const INCOMES_COLOR = '#2ECF53';
     private const AVERAGE_SPENDING_COLOR = '#083BCE';
-    private const SALARIES_COLOR = '#f7f028';
-    private const SALARIES_CATEGORY_ID = 'b19436b0-95cb-11ee-b9e0-0242ac130003';
-
     private const BASE_HEADING_LABEL = 'Apports, dépenses mensuelles et moyenne glissante sur ' . self::MOVING_AVERAGE_WINDOW . ' mois';
     protected int | string | array $columnSpan = 'full';
     private array $spendingsData = [];
     private array $chartLabels = [];
     private array $incomesData = [];
-    private array $salariesData = [];
     public bool $isWithoutTravels = false;
 
     protected function getData(): array
     {
         $this->getTotalSpendings();
         $this->getTotalIncomes();
-        $this->getSalaries();
 
         return [
             'datasets' => [
@@ -59,14 +54,6 @@ class MacroPersoGlobalLineChart extends AbstractPersoLineChart
                     'borderColor' => self::AVERAGE_SPENDING_COLOR,
                     'backgroundColor' => self::AVERAGE_SPENDING_COLOR,
                     'pointBackgroundColor' => self::AVERAGE_SPENDING_COLOR,
-                    'pointRadius' => 2,
-                ],
-                [
-                    'label' => 'Salaires',
-                    'data' => $this->salariesData,
-                    'borderColor' => self::SALARIES_COLOR,
-                    'backgroundColor' => self::SALARIES_COLOR,
-                    'pointBackgroundColor' => self::SALARIES_COLOR,
                     'pointRadius' => 2,
                 ],
             ],
@@ -103,16 +90,6 @@ class MacroPersoGlobalLineChart extends AbstractPersoLineChart
             $incomesData[] = (float) $income->total_credit;
         }
         $this->incomesData = $incomesData;
-    }
-
-    private function getSalaries(): void
-    {
-        $transactionRepository = new TransactionRepository();
-        $salaries = $transactionRepository->getMonthlyIncomesForCategoryId([], Account::PERSO_ACCOUNT_ALIAS, null, self::SALARIES_CATEGORY_ID);
-        foreach ($salaries as $salary) {
-            $salariesData[] = (float) $salary->total_credit;
-        }
-        $this->salariesData = $salariesData;
     }
 
 }
