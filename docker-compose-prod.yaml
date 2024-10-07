@@ -44,8 +44,6 @@ services:
       - ./docker/nginx/default.conf:/etc/nginx/vhost.d/${APP_DOMAIN}
       - ./docker/nginx/phpmyadmin/default.conf:/etc/nginx/vhost.d/${PHPMYADMIN_DOMAIN}
       - ./docker/nginx/phpmyadmin/location_override.conf:/etc/nginx/vhost.d/${PHPMYADMIN_DOMAIN}_location_override
-      - ./docker/nginx/mongoexpress/default.conf:/etc/nginx/vhost.d/${MONGOEXPRESS_DOMAIN}
-      - ./docker/nginx/mongoexpress/location_override.conf:/etc/nginx/vhost.d/${MONGOEXPRESS_DOMAIN}_location_override
     labels:
     - "com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy=true"
     networks:
@@ -128,26 +126,6 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
     volumes:
       - mongodbdata:/data/db
-    networks:
-      - net
-
-  # Mongo Express (GUI for MongoDB)
-  mongo-express:
-    image: mongo-express:0.54.0
-    container_name: mongo-express
-    restart: unless-stopped
-    ports:
-      - "8081:8081"
-    environment:
-      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_INITDB_ROOT_USERNAME}
-      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-      ME_CONFIG_BASICAUTH_USERNAME: ${MONGOEXPRESS_AUTH_USER}
-      ME_CONFIG_BASICAUTH_PASSWORD: ${MONGOEXPRESS_AUTH_PASSWORD}
-      ME_CONFIG_MONGODB_SERVER: mongodb
-      VIRTUAL_HOST: ${MONGOEXPRESS_DOMAIN}
-      LETSENCRYPT_HOST: ${MONGOEXPRESS_DOMAIN}
-    depends_on:
-      - mongodb
     networks:
       - net
 
