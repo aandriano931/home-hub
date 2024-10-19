@@ -21,7 +21,11 @@ docker exec -u 1001 app php artisan route:cache
 sleep 1
 docker exec -u 1001 app php artisan config:cache
 
-# Update Node.js and run the build
+# Clear node_modules before running npm install
+docker exec -u 0 app rm -rf node_modules
+docker exec -u 0 app npm cache clean --force
+
+# Install Node.js dependencies and run the build
 docker exec -u 0 app npm install
 docker exec -u 0 app npm run build
 
