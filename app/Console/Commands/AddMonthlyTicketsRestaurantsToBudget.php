@@ -13,6 +13,7 @@ class AddMonthlyTicketsRestaurantsToBudget extends Command
 {
     private const DEFAULT_TR_DEBIT = 175.00;
     private const DEFAULT_TR_LABEL = 'SIMULATION DEPENSES TICKETS RESTAURANTS';
+    private const DEFAULT_START_DATE = '2020-01-01';
 
     private const TR_EXCLUDED_MONTHS = [
         '04/2024',
@@ -33,7 +34,7 @@ class AddMonthlyTicketsRestaurantsToBudget extends Command
     {
         //Get a list of all months between the first transaction and the last one
         $transactions = DB::table('bank_transaction')->orderBy('operation_date', 'asc')->get();
-        $start = Carbon::parse(TransactionRepository::DEFAULT_START_DATE);
+        $start = Carbon::parse(self::DEFAULT_START_DATE);
         $end = Carbon::parse($transactions->last()->operation_date);
         $period = CarbonPeriod::create($start, '1 month', $end);
         $formattedMonths = [];
